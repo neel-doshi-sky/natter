@@ -1,4 +1,4 @@
-package com.natter.model;
+package com.natter.model.user;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

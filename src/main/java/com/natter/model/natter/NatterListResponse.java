@@ -1,6 +1,7 @@
 package com.natter.model.natter;
 
 import com.natter.model.natter.Natter;
+import com.natter.model.user.UserResponseModel;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,4 +16,5 @@ public class NatterListResponse {
   private LocalDateTime lastRefreshed;
   private List<String> errorMessages = new ArrayList<>();
   private List<String> messages = new ArrayList<>();
+  private UserResponseModel userResponseModel;
 }

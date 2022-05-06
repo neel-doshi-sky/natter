@@ -16,7 +16,10 @@ spring:
         registration:
           google:
             clientId: 921876503633-7q4vvf2v979fa6k0ftasdj18h01i7ovd.apps.googleusercontent.com
-            client-secret: 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
+            clientSecret: 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
+            scope:
+              - email
+              - profile
 
 astra:
   db:
@@ -28,3 +31,9 @@ astra:
 
 datastax.astra:
   secure-connect-bundle: secure-connect.zip
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

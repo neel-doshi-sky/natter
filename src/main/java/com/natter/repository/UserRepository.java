@@ -1,7 +1,6 @@
 package com.natter.repository;
 
-import com.natter.model.User;
-import java.util.Optional;
+import com.natter.model.user.User;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.stereotype.Repository;
 

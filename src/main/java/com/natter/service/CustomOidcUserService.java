@@ -1,7 +1,7 @@
 package com.natter.service;
 
 import com.natter.model.GoogleUserInfo;
-import com.natter.model.User;
+import com.natter.model.user.User;
 import com.natter.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.HashSet;

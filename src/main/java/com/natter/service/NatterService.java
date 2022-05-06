@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,7 @@ public class NatterService {
   private Natter buildNatterEntity(NatterCreateRequest natterCreateRequest) {
     LocalDateTime now = LocalDateTime.now();
     return Natter.builder()
+        .id(UUID.randomUUID().toString())
         .body(natterCreateRequest.getBody())
         .parentNatterId(natterCreateRequest.getParentNatterId())
         .timeCreated(now)
