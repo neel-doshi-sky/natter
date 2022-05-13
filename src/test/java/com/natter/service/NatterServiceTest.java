@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.natter.dto.BaseResponseDto;
+import com.natter.dto.NatterListResponseDto;
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.enums.natter.SuccessMessageEnum;
 import com.natter.model.natter.Natter;
@@ -22,6 +23,7 @@ import com.natter.service.natter.NatterValidationService;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -42,6 +44,8 @@ class NatterServiceTest {
 
   @Mock
   NatterValidationService natterValidationService;
+
+  NatterServiceTestHelper natterServiceTestHelper = new NatterServiceTestHelper();
 
 
   @Test
@@ -175,6 +179,17 @@ class NatterServiceTest {
         () -> assertNotNull(responseDto.getErrorMessages()),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
         () -> assertEquals(ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getMessage(), responseDto.getErrorMessages().get(ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getErrorCode()))
+    );
+  }
+
+  @Test
+  public void whenListUserNatters_returnNatters(){
+    List<Natter> nattersToReturn = natterServiceTestHelper.getListOfNatters();
+    when(natterRepository.getNattersByAuthorId(any())).thenReturn(nattersToReturn);
+    NatterListResponseDto responseDto = natterService.getNattersForUser("115826771724477311086");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertEquals(nattersToReturn.size(), responseDto.getNatterList().size())
     );
   }
 

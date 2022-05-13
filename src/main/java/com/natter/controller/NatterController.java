@@ -1,11 +1,12 @@
 package com.natter.controller;
 
 import com.natter.dto.BaseResponseDto;
+import com.natter.dto.NatterListResponseDto;
 import com.natter.model.GoogleUserInfo;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.dto.NatterCreationResponseDto;
-import com.natter.model.natter.NatterListResponse;
 import com.natter.model.user.UserResponseModel;
+import com.natter.service.AuthService;
 import com.natter.service.natter.NatterService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,17 +35,13 @@ public class NatterController {
 
   private final NatterService natterService;
 
-  @GetMapping(value = "/")
-  public ResponseEntity<NatterListResponse> list(
+  private final AuthService authService;
+
+  @GetMapping(value = "/user")
+  public ResponseEntity<NatterListResponseDto> listUsersNatters(
       @AuthenticationPrincipal OAuth2User principal) {
 
-    NatterListResponse natterListResponse = new NatterListResponse();
-    natterListResponse.setLastRefreshed(LocalDateTime.now());
-    natterListResponse.setNatterList(new ArrayList<>());
-    natterListResponse.setUserResponseModel(
-        new UserResponseModel(principal.getAttribute("name"), principal.getAttribute("email")));
-
-
+    NatterListResponseDto natterListResponse = natterService.getNattersForUser(authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(natterListResponse, HttpStatus.OK);
 
   }
@@ -61,16 +58,15 @@ public class NatterController {
   public ResponseEntity<NatterCreationResponseDto> create(
       @AuthenticationPrincipal OAuth2User principal,
       @RequestBody NatterCreateRequest natterCreateRequest) {
-    GoogleUserInfo googleUserInfo = new GoogleUserInfo(principal.getAttributes());
-    NatterCreationResponseDto result = natterService.create(natterCreateRequest, googleUserInfo.getId());
+
+    NatterCreationResponseDto result = natterService.create(natterCreateRequest, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
 
   }
 
   @DeleteMapping(value = "/{id}")
   public ResponseEntity<BaseResponseDto> delete(@AuthenticationPrincipal OAuth2User principal, @PathVariable String id){
-    GoogleUserInfo googleUserInfo = new GoogleUserInfo(principal.getAttributes());
-    BaseResponseDto result = natterService.delete(id, googleUserInfo.getId());
+    BaseResponseDto result = natterService.delete(id, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
   }
 

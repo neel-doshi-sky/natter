@@ -1,16 +1,18 @@
 package com.natter.service.natter;
 
 import com.natter.dto.BaseResponseDto;
+import com.natter.dto.NatterCreationResponseDto;
+import com.natter.dto.NatterListResponseDto;
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.enums.natter.SuccessMessageEnum;
 import com.natter.model.natter.Natter;
 import com.natter.model.natter.NatterCreateRequest;
-import com.natter.dto.NatterCreationResponseDto;
 import com.natter.repository.NatterRepository;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -118,9 +120,24 @@ public class NatterService {
         response.setStatus(HttpStatus.FORBIDDEN);
       }
     } else {
-      response.setErrorMessages(Map.of(ErrorMessageEnum.NATTER_NULL_ID.getErrorCode(), ErrorMessageEnum.NATTER_NULL_ID.getMessage()));
+      response.setErrorMessages(Map.of(ErrorMessageEnum.NATTER_NULL_ID.getErrorCode(),
+          ErrorMessageEnum.NATTER_NULL_ID.getMessage()));
       response.setStatus(HttpStatus.BAD_REQUEST);
     }
     return response;
+  }
+
+  /**
+   * Method to return natters for a particular user
+   *
+   * @param authorId the user to get natters for
+   * @return the dto containing natters
+   */
+  public NatterListResponseDto getNattersForUser(String authorId) {
+    NatterListResponseDto natterListResponseDto = new NatterListResponseDto();
+    List<Natter> natterList = natterRepository.getNattersByAuthorId(authorId);
+    natterListResponseDto.setNatterList(natterList);
+    natterListResponseDto.setStatus(HttpStatus.OK);
+    return natterListResponseDto;
   }
 }
