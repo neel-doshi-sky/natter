@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.natter.enums.natter.NatterRequiredFieldsEnum;
 import com.natter.model.natter.NatterCreateRequest;
+import com.natter.service.natter.NatterValidationService;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Random;

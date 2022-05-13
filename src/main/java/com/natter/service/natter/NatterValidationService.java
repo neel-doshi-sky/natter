@@ -1,4 +1,4 @@
-package com.natter.service;
+package com.natter.service.natter;
 
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.enums.natter.NatterRequiredFieldsEnum;

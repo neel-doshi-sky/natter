@@ -3,7 +3,6 @@ package com.natter.model.natter;
 import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.Builder;
-import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -19,7 +18,6 @@ import org.springframework.data.cassandra.core.mapping.Table;
 public class Natter {
 
   @Id
-  @Generated()
   @PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
   private String id;
   @Column
