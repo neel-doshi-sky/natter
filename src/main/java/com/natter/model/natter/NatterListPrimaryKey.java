@@ -18,9 +18,6 @@ public class NatterListPrimaryKey {
   @PrimaryKeyColumn(name = "authorId", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
   private String authorId;
 
-  @PrimaryKeyColumn(name = "created", ordinal = 1, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
-  private LocalDateTime created;
-
   @PrimaryKeyColumn(name = "created_time_uuid", ordinal = 2, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
   @CassandraType(type = CassandraType.Name.TEXT)
   private String timeId;

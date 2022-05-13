@@ -1,7 +1,9 @@
 package com.natter.model.natter;
 
+import java.time.LocalDateTime;
 import lombok.Data;
 import org.springframework.data.cassandra.core.mapping.CassandraType;
+import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -14,4 +16,7 @@ public class NatterList {
 
   @CassandraType(type = CassandraType.Name.TEXT)
   private String body;
+
+  @Column
+  private LocalDateTime created;
 }

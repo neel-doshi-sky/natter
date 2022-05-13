@@ -43,13 +43,13 @@ public class NatterService {
     UUID timeId = Uuids.timeBased();
     NatterCreationResponseDto response = new NatterCreationResponseDto();
     NatterListPrimaryKey natterListPrimaryKey = new NatterListPrimaryKey();
-    natterListPrimaryKey.setCreated(LocalDateTime.now());
     natterListPrimaryKey.setTimeId(timeId.toString());
     natterListPrimaryKey.setAuthorId(authorId);
 
     NatterList natterList = new NatterList();
     natterList.setId(natterListPrimaryKey);
     natterList.setBody(request.getBody());
+    natterList.setCreated(LocalDateTime.now());
 
     natterListRepository.save(natterList);
 
@@ -95,6 +95,10 @@ public class NatterService {
 
     BaseResponseDto response = new BaseResponseDto();
     natterRepository.deleteById(idToDelete);
+    NatterListPrimaryKey key = new NatterListPrimaryKey();
+    key.setTimeId(idToDelete);
+    key.setAuthorId(authorId);
+    natterListRepository.deleteById(key);
     response.setStatus(HttpStatus.OK);
     return response;
   }
@@ -110,6 +114,7 @@ public class NatterService {
     List<NatterList> natterList =
         natterListRepository.findAllByAuthorId(authorId);
     natterListResponseDto.setNatterLists(natterList);
+    natterListResponseDto.setStatus(HttpStatus.OK);
     return natterListResponseDto;
   }
 }
