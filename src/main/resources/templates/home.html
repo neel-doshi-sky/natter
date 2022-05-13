@@ -9,8 +9,8 @@
 <body>
 <h1>HOME</h1>
 
-<div th:each="natter: ${natters}">
-    <p th:text="${natter.natterBody}"></p>
+<div th:each="natterOriginal: ${natters}">
+    <p th:text="${natterOriginal.natterBody}"></p>
 </div>
 
 

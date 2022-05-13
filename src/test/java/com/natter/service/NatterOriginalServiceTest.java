@@ -14,10 +14,10 @@ import com.natter.dto.BaseResponseDto;
 import com.natter.dto.NatterListResponseDto;
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.enums.natter.SuccessMessageEnum;
-import com.natter.model.natter.Natter;
+import com.natter.model.natter.NatterOriginal;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.dto.NatterCreationResponseDto;
-import com.natter.repository.NatterRepository;
+import com.natter.repository.NatterOriginalRepository;
 import com.natter.service.natter.NatterService;
 import com.natter.service.natter.NatterValidationService;
 import java.time.LocalDateTime;
@@ -33,13 +33,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class NatterServiceTest {
+class NatterOriginalServiceTest {
 
   @InjectMocks
   NatterService natterService;
 
   @Mock
-  NatterRepository natterRepository;
+  NatterOriginalRepository natterOriginalRepository;
 
 
   @Mock
@@ -67,35 +67,35 @@ class NatterServiceTest {
     natterRequest.setParentNatterId(null);
     natterRequest.setBody("This is a natter!");
 
-    Natter createdNatter = Natter.builder().build();
-    createdNatter.setParentNatterId(null);
-    createdNatter.setAuthorId("testUserId");
-    createdNatter.setUserReactions(new HashSet<>());
-    createdNatter.setBody("This is a natter!");
-    createdNatter.setId("12323");
-    createdNatter.setTimeCreated(LocalDateTime.now());
-    createdNatter.setTimeUpdated(createdNatter.getTimeCreated());
+    NatterOriginal createdNatterOriginal = NatterOriginal.builder().build();
+    createdNatterOriginal.setParentNatterId(null);
+    createdNatterOriginal.setAuthorId("testUserId");
+    createdNatterOriginal.setUserReactions(new HashSet<>());
+    createdNatterOriginal.setBody("This is a natter!");
+    createdNatterOriginal.setId("12323");
+    createdNatterOriginal.setTimeCreated(LocalDateTime.now());
+    createdNatterOriginal.setTimeUpdated(createdNatterOriginal.getTimeCreated());
 
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(new HashMap<>());
-    when(natterRepository.save(any())).thenReturn(createdNatter);
+    when(natterOriginalRepository.save(any())).thenReturn(createdNatterOriginal);
 
     NatterCreationResponseDto response = natterService.create(natterRequest, "123");
 
     assertAll(
         () -> assertNotNull(response),
         () -> assertEquals(1, response.getUserMessages().size()),
-        () -> assertEquals("12323", response.getCreatedNatter().getId()),
+        () -> assertEquals("12323", response.getCreatedNatterOriginal().getId()),
         () -> assertEquals(SuccessMessageEnum.CREATED_NEW_NATTER.getMessage(),
             response.getUserMessages().get(SuccessMessageEnum.CREATED_NEW_NATTER.getCode())),
-        () -> assertEquals(natterRequest.getBody(), response.getCreatedNatter().getBody()),
+        () -> assertEquals(natterRequest.getBody(), response.getCreatedNatterOriginal().getBody()),
         () -> assertEquals(natterRequest.getParentNatterId(),
-            response.getCreatedNatter().getParentNatterId()),
-        () -> assertNotNull(response.getCreatedNatter().getTimeCreated()),
-        () -> assertNotNull(response.getCreatedNatter().getTimeUpdated()),
-        () -> assertNotNull(response.getCreatedNatter().getAuthorId()),
+            response.getCreatedNatterOriginal().getParentNatterId()),
+        () -> assertNotNull(response.getCreatedNatterOriginal().getTimeCreated()),
+        () -> assertNotNull(response.getCreatedNatterOriginal().getTimeUpdated()),
+        () -> assertNotNull(response.getCreatedNatterOriginal().getAuthorId()),
         () -> assertTrue(response.getErrorMessages().isEmpty()));
 
-    verify(natterRepository, times(1)).save(any());
+    verify(natterOriginalRepository, times(1)).save(any());
   }
 
   @Test
@@ -131,7 +131,7 @@ class NatterServiceTest {
   @Test
   public void whenDeleteValidId_DeleteNatter_ReturnSuccessMessage(){
     Optional<String> optional = Optional.of("EXISTS");
-    when(natterRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
+    when(natterOriginalRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
     BaseResponseDto responseDto = natterService.delete("123", "123");
     assertAll(
         () -> assertNotNull(responseDto),
@@ -139,14 +139,14 @@ class NatterServiceTest {
         () -> assertEquals(1, responseDto.getUserMessages().size()),
         () -> assertEquals(SuccessMessageEnum.DELETED_NATTER.getMessage(), responseDto.getUserMessages().get(SuccessMessageEnum.DELETED_NATTER.getCode()))
     );
-    verify(natterRepository, times(1)).deleteByNatterId(any());
+    verify(natterOriginalRepository, times(1)).deleteByNatterId(any());
   }
 
   @Test
   public void whenDeleteValid_ThrowException_ReturnErrorMessage(){
-    doThrow(new IllegalArgumentException()).when(natterRepository).deleteByNatterId(any());
+    doThrow(new IllegalArgumentException()).when(natterOriginalRepository).deleteByNatterId(any());
     Optional<String> optional = Optional.of("EXISTS");
-    when(natterRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
+    when(natterOriginalRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
     BaseResponseDto responseDto = natterService.delete("123", "123");
     assertAll(
         () -> assertNotNull(responseDto),
@@ -154,7 +154,7 @@ class NatterServiceTest {
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
         () -> assertEquals(ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getMessage(), responseDto.getErrorMessages().get(ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getErrorCode()))
     );
-    verify(natterRepository, times(1)).deleteByNatterId(any());
+    verify(natterOriginalRepository, times(1)).deleteByNatterId(any());
   }
 
   @Test
@@ -172,7 +172,7 @@ class NatterServiceTest {
   @Test
   public void whenDeleteIdDoesNotBelongToAuthor_returnErrorMessage(){
     Optional<String> optional = Optional.empty();
-    when(natterRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
+    when(natterOriginalRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
     BaseResponseDto responseDto = natterService.delete("123", "123");
     assertAll(
         () -> assertNotNull(responseDto),
@@ -184,12 +184,12 @@ class NatterServiceTest {
 
   @Test
   public void whenListUserNatters_returnNatters(){
-    List<Natter> nattersToReturn = natterServiceTestHelper.getListOfNatters();
-    when(natterRepository.getNattersByAuthorId(any())).thenReturn(nattersToReturn);
+    List<NatterOriginal> nattersToReturn = natterServiceTestHelper.getListOfNatters();
+    when(natterOriginalRepository.getNattersByAuthorId(any())).thenReturn(nattersToReturn);
     NatterListResponseDto responseDto = natterService.getNattersForUser("115826771724477311086");
     assertAll(
         () -> assertNotNull(responseDto),
-        () -> assertEquals(nattersToReturn.size(), responseDto.getNatterList().size())
+        () -> assertEquals(nattersToReturn.size(), responseDto.getNatterOriginalList().size())
     );
   }
 

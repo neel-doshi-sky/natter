@@ -1,35 +1,22 @@
 package com.natter.model.natter;
 
-import java.time.LocalDateTime;
-import java.util.Set;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.data.cassandra.core.cql.Ordering;
+import java.util.UUID;
+import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
-import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.CassandraType;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
-@Table(value = "natter")
-@Getter
-@Setter
-@Builder
+@Table(value = "natters_by_id")
+@Data
 public class Natter {
 
+  @Id
   @PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
+  @CassandraType(type = CassandraType.Name.TEXT)
   private String id;
-  @PrimaryKeyColumn(name = "authorId",ordinal = 1, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
-  private String authorId;
-  @Column
-  private String body;
-  @Column
-  private Set<String> userReactions;
-  @Column
-  private LocalDateTime timeCreated;
-  @Column
-  private LocalDateTime timeUpdated;
-  @Column
-  private String parentNatterId;
 
+  @CassandraType(type = CassandraType.Name.TEXT)
+  private String body;
 }
