@@ -33,9 +33,10 @@ public class NatterService {
    * Method to create a natter item and save it to the database
    *
    * @param createRequest the create request body
+   * @param authorId the author id
    * @return the result of the operation with any errors
    */
-  public NatterCreationResponseDto create(NatterCreateRequest createRequest) {
+  public NatterCreationResponseDto create(NatterCreateRequest createRequest, String authorId) {
     NatterCreationResponseDto response = new NatterCreationResponseDto();
     Map<String, String> errorMessages = new HashMap<>();
     Map<String, String> userMessages = new HashMap<>();
@@ -47,7 +48,7 @@ public class NatterService {
       errorMessages = validationService.validateNatterCreateBody(createRequest);
       if (errorMessages.isEmpty()) {
         try{
-          Natter createdNatter = natterRepository.save(buildNatterEntity(createRequest));
+          Natter createdNatter = natterRepository.save(buildNatterEntity(createRequest, authorId));
           response.setCreatedNatter(createdNatter);
           userMessages.put(SuccessMessageEnum.CREATED_NEW_NATTER.getCode(),
               SuccessMessageEnum.CREATED_NEW_NATTER.getMessage());
@@ -71,14 +72,14 @@ public class NatterService {
    * @param natterCreateRequest the request object
    * @return the Entity that has been built
    */
-  private Natter buildNatterEntity(NatterCreateRequest natterCreateRequest) {
+  private Natter buildNatterEntity(NatterCreateRequest natterCreateRequest, String authorId) {
     LocalDateTime now = LocalDateTime.now();
     return Natter.builder()
         .id(UUID.randomUUID().toString())
         .body(natterCreateRequest.getBody())
         .parentNatterId(natterCreateRequest.getParentNatterId())
         .timeCreated(now)
-        .authorId(natterCreateRequest.getAuthorId())
+        .authorId(authorId)
         .userReactions(new HashSet<>())
         .timeUpdated(now)
         .build();
@@ -99,7 +100,7 @@ public class NatterService {
           natterRepository.findByAuthorIdAndNatterId(authorId, idToDelete);
       if (checkIfAllowed.isPresent()) {
         try {
-          natterRepository.deleteById(idToDelete);
+          natterRepository.deleteByNatterId(idToDelete);
           response.setUserMessages(Map.of(SuccessMessageEnum.DELETED_NATTER.getCode(),
               SuccessMessageEnum.DELETED_NATTER.getMessage()));
           response.setStatus(HttpStatus.OK);

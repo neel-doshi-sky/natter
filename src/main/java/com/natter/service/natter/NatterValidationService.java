@@ -14,7 +14,6 @@ public class NatterValidationService {
     Map<String, String> validationResults = new HashMap<>();
     validationResults.putAll(validateStringField(natterRequest.getBody(), NatterRequiredFieldsEnum.BODY));
     validationResults.putAll(validateStringField(natterRequest.getParentNatterId(), NatterRequiredFieldsEnum.PARENT_NATTER_ID));
-    validationResults.putAll(validateStringField(natterRequest.getBody(), NatterRequiredFieldsEnum.AUTHOR_ID));
 
 
     return validationResults;

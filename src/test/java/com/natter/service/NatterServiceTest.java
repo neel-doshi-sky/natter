@@ -47,7 +47,7 @@ class NatterServiceTest {
   @Test
   public void whenNatterIsNull_ReturnNoNatterToCreateMessageToUser() {
     NatterCreateRequest natter = null;
-    NatterCreationResponseDto response = natterService.create(natter);
+    NatterCreationResponseDto response = natterService.create(natter, "123");
     assertAll(
         () -> assertNotNull(response),
         () -> assertEquals(1, response.getErrorMessages().size()),
@@ -61,7 +61,6 @@ class NatterServiceTest {
   public void whenValidNatterIsSent_SaveNatterToDatabaseAndReturnSuccessMessage() {
     NatterCreateRequest natterRequest = new NatterCreateRequest();
     natterRequest.setParentNatterId(null);
-    natterRequest.setAuthorId("testUserId");
     natterRequest.setBody("This is a natter!");
 
     Natter createdNatter = Natter.builder().build();
@@ -76,7 +75,7 @@ class NatterServiceTest {
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(new HashMap<>());
     when(natterRepository.save(any())).thenReturn(createdNatter);
 
-    NatterCreationResponseDto response = natterService.create(natterRequest);
+    NatterCreationResponseDto response = natterService.create(natterRequest, "123");
 
     assertAll(
         () -> assertNotNull(response),
@@ -89,7 +88,7 @@ class NatterServiceTest {
             response.getCreatedNatter().getParentNatterId()),
         () -> assertNotNull(response.getCreatedNatter().getTimeCreated()),
         () -> assertNotNull(response.getCreatedNatter().getTimeUpdated()),
-        () -> assertEquals(natterRequest.getAuthorId(), response.getCreatedNatter().getAuthorId()),
+        () -> assertNotNull(response.getCreatedNatter().getAuthorId()),
         () -> assertTrue(response.getErrorMessages().isEmpty()));
 
     verify(natterRepository, times(1)).save(any());
@@ -99,14 +98,13 @@ class NatterServiceTest {
   public void whenMissingKeyFieldsArePassedToCreate_returnMissingFieldsErrorMessage() {
     NatterCreateRequest natterRequest = new NatterCreateRequest();
     natterRequest.setBody(null);
-    natterRequest.setAuthorId(null);
 
     Map<String, String> errors = new HashMap<>();
     errors.put("body", ErrorMessageEnum.NULL_OR_EMPTY_FIELD.getMessage());
     errors.put("authorId", ErrorMessageEnum.NULL_OR_EMPTY_FIELD.getMessage());
 
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(errors);
-    NatterCreationResponseDto natterCreationResponseDto = natterService.create(natterRequest);
+    NatterCreationResponseDto natterCreationResponseDto = natterService.create(natterRequest, "123");
     assertAll(
         () -> assertNotNull(natterCreationResponseDto),
         () -> assertEquals(2, natterCreationResponseDto.getErrorMessages().size())
@@ -116,7 +114,7 @@ class NatterServiceTest {
 
   @Test
   public void whenNullBodyPassedToCreate_returnNullBodyError(){
-    NatterCreationResponseDto natterCreationResponseDto = natterService.create(null);
+    NatterCreationResponseDto natterCreationResponseDto = natterService.create(null, "123");
     assertAll(
         () -> assertNotNull(natterCreationResponseDto),
         () -> assertNotNull(natterCreationResponseDto.getErrorMessages()),
@@ -137,12 +135,12 @@ class NatterServiceTest {
         () -> assertEquals(1, responseDto.getUserMessages().size()),
         () -> assertEquals(SuccessMessageEnum.DELETED_NATTER.getMessage(), responseDto.getUserMessages().get(SuccessMessageEnum.DELETED_NATTER.getCode()))
     );
-    verify(natterRepository, times(1)).deleteById(any());
+    verify(natterRepository, times(1)).deleteByNatterId(any());
   }
 
   @Test
   public void whenDeleteValid_ThrowException_ReturnErrorMessage(){
-    doThrow(new IllegalArgumentException()).when(natterRepository).deleteById(any());
+    doThrow(new IllegalArgumentException()).when(natterRepository).deleteByNatterId(any());
     Optional<String> optional = Optional.of("EXISTS");
     when(natterRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
     BaseResponseDto responseDto = natterService.delete("123", "123");
@@ -152,7 +150,7 @@ class NatterServiceTest {
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
         () -> assertEquals(ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getMessage(), responseDto.getErrorMessages().get(ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getErrorCode()))
     );
-    verify(natterRepository, times(1)).deleteById(any());
+    verify(natterRepository, times(1)).deleteByNatterId(any());
   }
 
   @Test

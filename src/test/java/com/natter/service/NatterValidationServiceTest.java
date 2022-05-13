@@ -24,12 +24,11 @@ class NatterValidationServiceTest {
   public void whenInvalidBodyWithNullProperties_returnMissingFieldsWithErrors(){
     NatterCreateRequest natter = new NatterCreateRequest();
     natter.setBody(null);
-    natter.setAuthorId(null);
 
     Map<String, String> result = validationService.validateNatterCreateBody(natter);
     assertAll(
         () -> assertNotNull(result),
-        () -> assertEquals(2, result.size())
+        () -> assertEquals(1, result.size())
     );
 
 
@@ -39,7 +38,6 @@ class NatterValidationServiceTest {
   public void whenValidBody_returnEmptyErrorMap(){
     NatterCreateRequest natter = new NatterCreateRequest();
     natter.setBody("test");
-    natter.setAuthorId("123");
     natter.setParentNatterId(null);
 
     Map<String, String> result = validationService.validateNatterCreateBody(natter);

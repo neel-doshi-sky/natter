@@ -8,7 +8,5 @@ public class NatterCreateRequest {
 
   private String body;
 
-  private String authorId;
-
   private String parentNatterId;
 }

@@ -61,7 +61,8 @@ public class NatterController {
   public ResponseEntity<NatterCreationResponseDto> create(
       @AuthenticationPrincipal OAuth2User principal,
       @RequestBody NatterCreateRequest natterCreateRequest) {
-    NatterCreationResponseDto result = natterService.create(natterCreateRequest);
+    GoogleUserInfo googleUserInfo = new GoogleUserInfo(principal.getAttributes());
+    NatterCreationResponseDto result = natterService.create(natterCreateRequest, googleUserInfo.getId());
     return new ResponseEntity<>(result, result.getStatus());
 
   }
