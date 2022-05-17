@@ -14,15 +14,17 @@ import com.natter.dto.BaseResponseDto;
 import com.natter.dto.NatterListResponseDto;
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.enums.natter.SuccessMessageEnum;
+import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterOriginal;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.dto.NatterCreationResponseDto;
+import com.natter.repository.NatterByAuthorRepository;
 import com.natter.repository.NatterOriginalRepository;
+import com.natter.repository.NatterByIdRepository;
 import com.natter.service.natter.NatterService;
 import com.natter.service.natter.NatterValidationService;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,13 +35,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class NatterOriginalServiceTest {
+class NatterServiceTest {
 
   @InjectMocks
   NatterService natterService;
 
   @Mock
   NatterOriginalRepository natterOriginalRepository;
+
+  @Mock
+  NatterByAuthorRepository natterByAuthorRepository;
+
+  @Mock
+  NatterByIdRepository natterByIdRepository;
 
 
   @Mock
@@ -67,35 +75,35 @@ class NatterOriginalServiceTest {
     natterRequest.setParentNatterId(null);
     natterRequest.setBody("This is a natter!");
 
-    NatterOriginal createdNatterOriginal = NatterOriginal.builder().build();
-    createdNatterOriginal.setParentNatterId(null);
-    createdNatterOriginal.setAuthorId("testUserId");
-    createdNatterOriginal.setUserReactions(new HashSet<>());
-    createdNatterOriginal.setBody("This is a natter!");
-    createdNatterOriginal.setId("12323");
-    createdNatterOriginal.setTimeCreated(LocalDateTime.now());
-    createdNatterOriginal.setTimeUpdated(createdNatterOriginal.getTimeCreated());
+    NatterById createdNatterById = new NatterById();
+    createdNatterById.setParentNatterId(null);
+    createdNatterById.setAuthorId("testUserId");
+    createdNatterById.setBody("This is a natter!");
+    createdNatterById.setId("12323");
+    createdNatterById.setDateCreated(LocalDateTime.now());
+    createdNatterById.setDateUpdated(createdNatterById.getDateCreated());
 
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(new HashMap<>());
-    when(natterOriginalRepository.save(any())).thenReturn(createdNatterOriginal);
+    when(natterByIdRepository.save(any())).thenReturn(createdNatterById);
 
     NatterCreationResponseDto response = natterService.create(natterRequest, "123");
 
     assertAll(
         () -> assertNotNull(response),
         () -> assertEquals(1, response.getUserMessages().size()),
-        () -> assertEquals("12323", response.getCreatedNatterOriginal().getId()),
+        () -> assertEquals("12323", response.getNatterById().getId()),
         () -> assertEquals(SuccessMessageEnum.CREATED_NEW_NATTER.getMessage(),
             response.getUserMessages().get(SuccessMessageEnum.CREATED_NEW_NATTER.getCode())),
-        () -> assertEquals(natterRequest.getBody(), response.getCreatedNatterOriginal().getBody()),
+        () -> assertEquals(natterRequest.getBody(), response.getNatterById().getBody()),
         () -> assertEquals(natterRequest.getParentNatterId(),
-            response.getCreatedNatterOriginal().getParentNatterId()),
-        () -> assertNotNull(response.getCreatedNatterOriginal().getTimeCreated()),
-        () -> assertNotNull(response.getCreatedNatterOriginal().getTimeUpdated()),
-        () -> assertNotNull(response.getCreatedNatterOriginal().getAuthorId()),
+            response.getNatterById().getParentNatterId()),
+        () -> assertNotNull(response.getNatterById().getDateCreated()),
+        () -> assertNotNull(response.getNatterById().getDateUpdated()),
+        () -> assertNotNull(response.getNatterById().getAuthorId()),
         () -> assertTrue(response.getErrorMessages().isEmpty()));
 
-    verify(natterOriginalRepository, times(1)).save(any());
+    verify(natterByAuthorRepository, times(1)).save(any());
+    verify(natterByIdRepository, times(1)).save(any());
   }
 
   @Test
@@ -139,22 +147,8 @@ class NatterOriginalServiceTest {
         () -> assertEquals(1, responseDto.getUserMessages().size()),
         () -> assertEquals(SuccessMessageEnum.DELETED_NATTER.getMessage(), responseDto.getUserMessages().get(SuccessMessageEnum.DELETED_NATTER.getCode()))
     );
-    verify(natterOriginalRepository, times(1)).deleteByNatterId(any());
-  }
-
-  @Test
-  public void whenDeleteValid_ThrowException_ReturnErrorMessage(){
-    doThrow(new IllegalArgumentException()).when(natterOriginalRepository).deleteByNatterId(any());
-    Optional<String> optional = Optional.of("EXISTS");
-    when(natterOriginalRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
-    BaseResponseDto responseDto = natterService.delete("123", "123");
-    assertAll(
-        () -> assertNotNull(responseDto),
-        () -> assertNotNull(responseDto.getErrorMessages()),
-        () -> assertEquals(1, responseDto.getErrorMessages().size()),
-        () -> assertEquals(ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getMessage(), responseDto.getErrorMessages().get(ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getErrorCode()))
-    );
-    verify(natterOriginalRepository, times(1)).deleteByNatterId(any());
+    verify(natterByIdRepository, times(1)).deleteById(any());
+    verify(natterByAuthorRepository, times(1)).deleteById(any());
   }
 
   @Test
@@ -171,8 +165,10 @@ class NatterOriginalServiceTest {
 
   @Test
   public void whenDeleteIdDoesNotBelongToAuthor_returnErrorMessage(){
-    Optional<String> optional = Optional.empty();
-    when(natterOriginalRepository.findByAuthorIdAndNatterId(any(), any())).thenReturn(optional);
+    NatterById natter = new NatterById();
+    natter.setAuthorId("4545");
+    Optional<NatterById> optional = Optional.of(natter);
+    when(natterByIdRepository.findById(any())).thenReturn(optional);
     BaseResponseDto responseDto = natterService.delete("123", "123");
     assertAll(
         () -> assertNotNull(responseDto),

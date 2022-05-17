@@ -1,7 +1,6 @@
 package com.natter.dto;
 
-import com.natter.model.natter.Natter;
-import com.natter.model.natter.NatterOriginal;
+import com.natter.model.natter.NatterById;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +8,5 @@ import lombok.Setter;
 @Setter
 public class NatterCreationResponseDto extends BaseResponseDto {
 
-  private NatterOriginal createdNatterOriginal;
-  private Natter natter;
+  private NatterById natterById;
 }

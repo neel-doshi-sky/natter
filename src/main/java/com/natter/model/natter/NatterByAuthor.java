@@ -9,7 +9,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("natter_by_author")
 @Data
-public class NatterList {
+public class NatterByAuthor {
 
   @PrimaryKey
   private NatterListPrimaryKey id;

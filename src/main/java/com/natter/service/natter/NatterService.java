@@ -4,17 +4,21 @@ import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.natter.dto.BaseResponseDto;
 import com.natter.dto.NatterCreationResponseDto;
 import com.natter.dto.NatterListResponseDto;
-import com.natter.model.natter.Natter;
+import com.natter.enums.natter.ErrorMessageEnum;
+import com.natter.enums.natter.SuccessMessageEnum;
+import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
-import com.natter.model.natter.NatterList;
+import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterListPrimaryKey;
 import com.natter.model.natter.NatterOriginal;
-import com.natter.repository.NatterListRepository;
+import com.natter.repository.NatterByAuthorRepository;
 import com.natter.repository.NatterOriginalRepository;
-import com.natter.repository.NatterRepository;
+import com.natter.repository.NatterByIdRepository;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -29,36 +33,53 @@ public class NatterService {
 
   private final NatterOriginalRepository natterOriginalRepository;
   private final NatterValidationService validationService;
-  private final NatterListRepository natterListRepository;
-  private final NatterRepository natterRepository;
+  private final NatterByAuthorRepository natterByAuthorRepository;
+  private final NatterByIdRepository natterByIdRepository;
 
   /**
    * Method to create a natter item and save it to the database
    *
-   * @param request  the create request body
+   * @param natterCreateRequest  the create natterCreateRequest body
    * @param authorId the author id
    * @return the result of the operation with any errors
    */
-  public NatterCreationResponseDto create(NatterCreateRequest request, String authorId) {
-    UUID timeId = Uuids.timeBased();
+  public NatterCreationResponseDto create(NatterCreateRequest natterCreateRequest, String authorId) {
     NatterCreationResponseDto response = new NatterCreationResponseDto();
-    NatterListPrimaryKey natterListPrimaryKey = new NatterListPrimaryKey();
-    natterListPrimaryKey.setTimeId(timeId.toString());
-    natterListPrimaryKey.setAuthorId(authorId);
+    if(natterCreateRequest == null){
+       response.setStatus(HttpStatus.BAD_REQUEST);
+       response.setErrorMessages(Map.of(ErrorMessageEnum.NATTER_CREATION_ERROR_NULL_BODY.getErrorCode(), ErrorMessageEnum.NATTER_CREATION_ERROR_NULL_BODY.getMessage()));
+    } else {
+      Map<String, String> validationResult = validationService.validateNatterCreateBody(natterCreateRequest);
+      if(validationResult.isEmpty()) {
+        UUID timeId = Uuids.timeBased();
+        NatterListPrimaryKey natterListPrimaryKey = new NatterListPrimaryKey();
+        natterListPrimaryKey.setTimeId(timeId.toString());
+        natterListPrimaryKey.setAuthorId(authorId);
 
-    NatterList natterList = new NatterList();
-    natterList.setId(natterListPrimaryKey);
-    natterList.setBody(request.getBody());
-    natterList.setCreated(LocalDateTime.now());
+        NatterByAuthor natterByAuthor = new NatterByAuthor();
+        natterByAuthor.setId(natterListPrimaryKey);
+        natterByAuthor.setBody(natterCreateRequest.getBody());
+        natterByAuthor.setCreated(LocalDateTime.now());
 
-    natterListRepository.save(natterList);
+        natterByAuthorRepository.save(natterByAuthor);
 
-    Natter natter = new Natter();
-    natter.setId(timeId.toString());
-    natter.setBody(request.getBody());
-    Natter created = natterRepository.save(natter);
-    response.setNatter(created);
-    response.setStatus(HttpStatus.OK);
+        NatterById natterById = new NatterById();
+        natterById.setId(timeId.toString());
+        natterById.setBody(natterCreateRequest.getBody());
+        LocalDateTime now = LocalDateTime.now();
+        natterById.setDateCreated(now);
+        natterById.setDateUpdated(now);
+        natterById.setParentNatterId(null);
+        NatterById created = natterByIdRepository.save(natterById);
+        response.setNatterById(created);
+        response.setStatus(HttpStatus.OK);
+        response.setUserMessages(Map.of(SuccessMessageEnum.CREATED_NEW_NATTER.getCode(), SuccessMessageEnum.CREATED_NEW_NATTER.getMessage()));
+      } else {
+        response.setErrorMessages(validationResult);
+        response.setStatus(HttpStatus.BAD_REQUEST);
+
+      }
+    }
     return response;
   }
 
@@ -91,15 +112,32 @@ public class NatterService {
    * @return the response
    */
   public BaseResponseDto delete(String idToDelete, @NonNull String authorId) {
-
-
     BaseResponseDto response = new BaseResponseDto();
-    natterRepository.deleteById(idToDelete);
-    NatterListPrimaryKey key = new NatterListPrimaryKey();
-    key.setTimeId(idToDelete);
-    key.setAuthorId(authorId);
-    natterListRepository.deleteById(key);
-    response.setStatus(HttpStatus.OK);
+
+    if(idToDelete == null){
+      response.setErrorMessages(Map.of(ErrorMessageEnum.NATTER_NULL_ID.getErrorCode(), ErrorMessageEnum.NATTER_NULL_ID.getMessage()));
+      response.setStatus(HttpStatus.BAD_REQUEST);
+
+    } else {
+      Optional<NatterById> foundById = natterByIdRepository.findById(idToDelete);
+      if(foundById.isPresent()) {
+       if(foundById.get().getAuthorId().equals(authorId)) {
+         natterByIdRepository.deleteById(idToDelete);
+         NatterListPrimaryKey key = new NatterListPrimaryKey();
+         key.setTimeId(idToDelete);
+         key.setAuthorId(authorId);
+         natterByAuthorRepository.deleteById(key);
+         response.setStatus(HttpStatus.OK);
+       } else {
+         response.setErrorMessages(Map.of(ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getErrorCode(), ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
+         response.setStatus(HttpStatus.FORBIDDEN);
+       }
+      } else {
+        response.setErrorMessages(Map.of(ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getErrorCode(), ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getMessage()));
+        response.setStatus(HttpStatus.FORBIDDEN);
+      }
+    }
+
     return response;
   }
 
@@ -111,9 +149,9 @@ public class NatterService {
    */
   public NatterListResponseDto getNattersForUser(String authorId) {
     NatterListResponseDto natterListResponseDto = new NatterListResponseDto();
-    List<NatterList> natterList =
-        natterListRepository.findAllByAuthorId(authorId);
-    natterListResponseDto.setNatterLists(natterList);
+    List<NatterByAuthor> natterByAuthor =
+        natterByAuthorRepository.findAllByAuthorId(authorId);
+    natterListResponseDto.setNatterByAuthors(natterByAuthor);
     natterListResponseDto.setStatus(HttpStatus.OK);
     return natterListResponseDto;
   }
