@@ -1,35 +1,18 @@
 package com.natter.service;
 
-import com.natter.model.natter.NatterOriginal;
-import java.time.LocalDateTime;
-import java.util.HashSet;
+import com.natter.model.natter.NatterByAuthor;
 import java.util.List;
-import java.util.UUID;
 
 public class NatterServiceTestHelper {
 
-  public List<NatterOriginal> getListOfNatters(){
-    NatterOriginal natterOriginal = NatterOriginal.builder().id(UUID.randomUUID().toString()).parentNatterId(null)
-        .authorId("115826771724477311086").body("NATTER 1").timeCreated(
-            LocalDateTime.now()).timeUpdated(LocalDateTime.now()).userReactions(new HashSet<>())
-        .build();
-    NatterOriginal natterOriginal2 = NatterOriginal.builder().id(UUID.randomUUID().toString()).parentNatterId(null)
-        .authorId("115826771724477311086").body("NATTER 2").timeCreated(
-            LocalDateTime.now()).timeUpdated(LocalDateTime.now()).userReactions(new HashSet<>())
-        .build();
-    NatterOriginal natterOriginal3 = NatterOriginal.builder().id(UUID.randomUUID().toString()).parentNatterId(null)
-        .authorId("115826771724477311086").body("NATTER 3").timeCreated(
-            LocalDateTime.now()).timeUpdated(LocalDateTime.now()).userReactions(new HashSet<>())
-        .build();
-    NatterOriginal natterOriginal4 = NatterOriginal.builder().id(UUID.randomUUID().toString()).parentNatterId(null)
-        .authorId("115826771724477311086").body("NATTER 4").timeCreated(
-            LocalDateTime.now()).timeUpdated(LocalDateTime.now()).userReactions(new HashSet<>())
-        .build();
-    NatterOriginal natterOriginal5 = NatterOriginal.builder().id(UUID.randomUUID().toString()).parentNatterId(null)
-        .authorId("115826771724477311086").body("NATTER 5").timeCreated(
-            LocalDateTime.now()).timeUpdated(LocalDateTime.now()).userReactions(new HashSet<>())
-        .build();
-    return List.of(natterOriginal, natterOriginal2, natterOriginal3, natterOriginal4,
-        natterOriginal5);
+  public List<NatterByAuthor> getListOfNatters(){
+
+    NatterByAuthor natterByAuthor = new NatterByAuthor();
+    NatterByAuthor natterByAuthor1 = new NatterByAuthor();
+    NatterByAuthor natterByAuthor2 = new NatterByAuthor();
+    NatterByAuthor natterByAuthor3 = new NatterByAuthor();
+    NatterByAuthor natterByAuthor4 = new NatterByAuthor();
+    NatterByAuthor natterByAuthor5 = new NatterByAuthor();
+    return List.of(natterByAuthor, natterByAuthor2,natterByAuthor1, natterByAuthor3, natterByAuthor5, natterByAuthor4);
   }
 }

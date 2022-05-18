@@ -11,6 +11,5 @@ import lombok.Setter;
 @Setter
 public class NatterListResponseDto extends BaseResponseDto{
 
-  private List<NatterOriginal> natterOriginalList = new ArrayList<>();
   private List<NatterByAuthor> natterByAuthors = new ArrayList<>();
 }

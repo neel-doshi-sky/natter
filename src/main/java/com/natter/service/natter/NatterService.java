@@ -128,6 +128,7 @@ public class NatterService {
          key.setAuthorId(authorId);
          natterByAuthorRepository.deleteById(key);
          response.setStatus(HttpStatus.OK);
+         response.setUserMessages(Map.of(SuccessMessageEnum.DELETED_NATTER.getCode(), SuccessMessageEnum.DELETED_NATTER.getMessage()));
        } else {
          response.setErrorMessages(Map.of(ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getErrorCode(), ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
          response.setStatus(HttpStatus.FORBIDDEN);
@@ -153,6 +154,7 @@ public class NatterService {
         natterByAuthorRepository.findAllByAuthorId(authorId);
     natterListResponseDto.setNatterByAuthors(natterByAuthor);
     natterListResponseDto.setStatus(HttpStatus.OK);
+    natterListResponseDto.setUserMessages(Map.of(SuccessMessageEnum.FETCHED_NATTERS_BY_AUTHOR.getCode(), SuccessMessageEnum.FETCHED_NATTERS_BY_AUTHOR.getMessage()));
     return natterListResponseDto;
   }
 }
