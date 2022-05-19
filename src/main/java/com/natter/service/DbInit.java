@@ -24,21 +24,24 @@ public class DbInit {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest();
     natterCreateRequest.setParentNatterId(null);
     natterCreateRequest.setBody("Test natter 1");
+
     NatterCreateRequest natterCreateRequest1 = new NatterCreateRequest();
-    natterCreateRequest.setParentNatterId(null);
-    natterCreateRequest.setBody("Test natter 2");
+    natterCreateRequest1.setParentNatterId(null);
+    natterCreateRequest1.setBody("Test natter 2");
+
     NatterCreateRequest natterCreateRequest2 = new NatterCreateRequest();
-    natterCreateRequest.setParentNatterId(null);
-    natterCreateRequest.setBody("Test natter 3");
+    natterCreateRequest2.setParentNatterId(null);
+    natterCreateRequest2.setBody("Test natter 3");
+
     NatterCreateRequest natterCreateRequest3 = new NatterCreateRequest();
-    natterCreateRequest.setParentNatterId(null);
-    natterCreateRequest.setBody("Test natter 4");
+    natterCreateRequest3.setParentNatterId(null);
+    natterCreateRequest3.setBody("Test natter 4");
 
     List<NatterCreateRequest> natterCreateRequests = List.of(natterCreateRequest1, natterCreateRequest2, natterCreateRequest3, natterCreateRequest);
-    natterCreateRequests.forEach(natterCreateRequestObject ->{
-      natterService.create(natterCreateRequestObject, "115826771724477311086");
-    } );
 
+    for(NatterCreateRequest request : natterCreateRequests){
+      natterService.create(request, "115826771724477311086");
+    }
 
   }
 }

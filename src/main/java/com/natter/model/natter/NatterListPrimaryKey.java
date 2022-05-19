@@ -1,7 +1,5 @@
 package com.natter.model.natter;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.cassandra.core.cql.Ordering;
