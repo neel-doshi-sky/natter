@@ -6,13 +6,12 @@ import com.natter.dto.NatterCreationResponseDto;
 import com.natter.dto.NatterListResponseDto;
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.enums.natter.SuccessMessageEnum;
+import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterByAuthor;
-import com.natter.model.natter.NatterListPrimaryKey;
 import com.natter.repository.NatterByAuthorRepository;
 import com.natter.repository.NatterByIdRepository;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +30,7 @@ public class NatterService {
   private final NatterValidationService validationService;
   private final NatterByAuthorRepository natterByAuthorRepository;
   private final NatterByIdRepository natterByIdRepository;
+  private final NatterDatabaseService natterDatabaseService;
 
   /**
    * Method to create a natter item and save it to the database
@@ -48,28 +48,16 @@ public class NatterService {
       Map<String, String> validationResult = validationService.validateNatterCreateBody(natterCreateRequest);
       if(validationResult.isEmpty()) {
         UUID timeId = Uuids.timeBased();
-        NatterListPrimaryKey natterListPrimaryKey = new NatterListPrimaryKey();
-        natterListPrimaryKey.setTimeId(timeId.toString());
-        natterListPrimaryKey.setAuthorId(authorId);
 
-        NatterByAuthor natterByAuthor = new NatterByAuthor();
-        natterByAuthor.setId(natterListPrimaryKey);
-        natterByAuthor.setBody(natterCreateRequest.getBody());
-        natterByAuthor.setCreated(LocalDateTime.now());
-
-        natterByAuthorRepository.save(natterByAuthor);
-
-        NatterById natterById = new NatterById();
-        natterById.setId(timeId.toString());
-        natterById.setBody(natterCreateRequest.getBody());
-        LocalDateTime now = LocalDateTime.now();
-        natterById.setDateCreated(now);
-        natterById.setDateUpdated(now);
-        natterById.setParentNatterId(null);
-        NatterById created = natterByIdRepository.save(natterById);
-        response.setNatterById(created);
-        response.setStatus(HttpStatus.OK);
-        response.setUserMessages(Map.of(SuccessMessageEnum.CREATED_NEW_NATTER.getCode(), SuccessMessageEnum.CREATED_NEW_NATTER.getMessage()));
+        try {
+          NatterById created = natterDatabaseService.saveNatter(timeId.toString(), natterCreateRequest, authorId);
+          response.setNatterById(created);
+          response.setStatus(HttpStatus.OK);
+          response.setUserMessages(Map.of(SuccessMessageEnum.CREATED_NEW_NATTER.getCode(), SuccessMessageEnum.CREATED_NEW_NATTER.getMessage()));
+        } catch (DatabaseErrorException e){
+          response.setErrorMessages(Map.of(e.getErrorMessageEnum().getErrorCode(), e.getErrorMessageEnum().getMessage()));
+          log.error("Error saving natter to db");
+        }
       } else {
         response.setErrorMessages(validationResult);
         response.setStatus(HttpStatus.BAD_REQUEST);
@@ -98,11 +86,7 @@ public class NatterService {
       Optional<NatterById> foundById = natterByIdRepository.findById(idToDelete);
       if(foundById.isPresent()) {
        if(foundById.get().getAuthorId().equals(authorId)) {
-         natterByIdRepository.deleteById(idToDelete);
-         NatterListPrimaryKey key = new NatterListPrimaryKey();
-         key.setTimeId(idToDelete);
-         key.setAuthorId(authorId);
-         natterByAuthorRepository.deleteById(key);
+         natterDatabaseService.deleteNatter(idToDelete, authorId);
          response.setStatus(HttpStatus.OK);
          response.setUserMessages(Map.of(SuccessMessageEnum.DELETED_NATTER.getCode(), SuccessMessageEnum.DELETED_NATTER.getMessage()));
        } else {
