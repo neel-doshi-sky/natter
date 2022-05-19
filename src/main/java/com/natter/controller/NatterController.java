@@ -1,15 +1,11 @@
 package com.natter.controller;
 
 import com.natter.dto.BaseResponseDto;
-import com.natter.dto.NatterListResponseDto;
-import com.natter.model.GoogleUserInfo;
-import com.natter.model.natter.NatterCreateRequest;
 import com.natter.dto.NatterCreationResponseDto;
-import com.natter.model.user.UserResponseModel;
+import com.natter.dto.NatterListResponseDto;
+import com.natter.model.natter.NatterCreateRequest;
 import com.natter.service.AuthService;
 import com.natter.service.natter.NatterService;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -59,13 +55,22 @@ public class NatterController {
       @AuthenticationPrincipal OAuth2User principal,
       @RequestBody NatterCreateRequest natterCreateRequest) {
 
-    NatterCreationResponseDto result = natterService.create(natterCreateRequest, authService.getUserIdFromAuth(principal));
+    NatterCreationResponseDto result =
+        natterService.create(natterCreateRequest, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
 
   }
 
+  /**
+   * Endpoint to delete a natter by id
+   *
+   * @param principal the authenticated user
+   * @param id        the id of the natter
+   * @return response entity containing result of operation
+   */
   @DeleteMapping(value = "/{id}")
-  public ResponseEntity<BaseResponseDto> delete(@AuthenticationPrincipal OAuth2User principal, @PathVariable String id){
+  public ResponseEntity<BaseResponseDto> delete(@AuthenticationPrincipal OAuth2User principal,
+                                                @PathVariable String id) {
     BaseResponseDto result = natterService.delete(id, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
   }

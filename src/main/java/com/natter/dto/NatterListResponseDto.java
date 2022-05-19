@@ -1,7 +1,6 @@
 package com.natter.dto;
 
 import com.natter.model.natter.NatterByAuthor;
-import com.natter.model.natter.NatterOriginal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;

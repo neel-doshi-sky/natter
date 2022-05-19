@@ -19,7 +19,6 @@ import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.repository.NatterByAuthorRepository;
 import com.natter.repository.NatterByIdRepository;
-import com.natter.repository.NatterOriginalRepository;
 import com.natter.service.natter.NatterService;
 import com.natter.service.natter.NatterValidationService;
 import java.time.LocalDateTime;
@@ -39,8 +38,6 @@ class NatterServiceTest {
   @InjectMocks
   NatterService natterService;
 
-  @Mock
-  NatterOriginalRepository natterOriginalRepository;
 
   @Mock
   NatterByAuthorRepository natterByAuthorRepository;

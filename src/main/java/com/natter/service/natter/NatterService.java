@@ -10,12 +10,9 @@ import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterListPrimaryKey;
-import com.natter.model.natter.NatterOriginal;
 import com.natter.repository.NatterByAuthorRepository;
-import com.natter.repository.NatterOriginalRepository;
 import com.natter.repository.NatterByIdRepository;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +28,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class NatterService {
 
-  private final NatterOriginalRepository natterOriginalRepository;
   private final NatterValidationService validationService;
   private final NatterByAuthorRepository natterByAuthorRepository;
   private final NatterByIdRepository natterByIdRepository;
@@ -83,26 +79,6 @@ public class NatterService {
     return response;
   }
 
-  /**
-   * Method to build an entity to save to the database
-   *
-   * @param natterCreateRequest the request object
-   * @return the Entity that has been built
-   */
-  private NatterOriginal buildNatterEntity(NatterCreateRequest natterCreateRequest,
-                                           String authorId) {
-    LocalDateTime now = LocalDateTime.now();
-    return NatterOriginal.builder()
-        .id(UUID.randomUUID().toString())
-        .body(natterCreateRequest.getBody())
-        .parentNatterId(natterCreateRequest.getParentNatterId())
-        .timeCreated(now)
-        .authorId(authorId)
-        .userReactions(new HashSet<>())
-        .timeUpdated(now)
-        .build();
-
-  }
 
   /**
    * Method to delete a natter by id
