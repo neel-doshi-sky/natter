@@ -20,9 +20,17 @@ public class UserService {
   private final UserInfoRepository userInfoRepository;
   private final UserDatabaseService userDatabaseService;
 
+  /**
+   * Method to follow or unfollow a user if they exist
+   *
+   * @param authUserId the authenticated user id
+   * @param id         the id of the user to follow or unfollow
+   * @param isFollow   is this a follow or unfollow request
+   * @return the response dto
+   */
   public ResponseDto followOrUnfollowUserById(String authUserId, String id, boolean isFollow) {
     ResponseDto response = new ResponseDto();
-    if(id == null){
+    if (id == null) {
       response.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_ID_NULL.getCode(),
           ErrorMessageUserEnum.USER_ID_NULL.getMessage()));
       response.setStatus(HttpStatus.BAD_REQUEST);

@@ -26,10 +26,10 @@ class UserServiceTest {
   UserService userService;
 
   @Mock
-  UserRepository userRepository;
+  UserInfoRepository userInfoRepository;
 
   @Mock
-  UserInfoRepository userInfoRepository;
+  UserDatabaseService userDatabaseService;
 
   @Test
   public void whenValidId_FollowUser_ReturnSuccessMessage(){

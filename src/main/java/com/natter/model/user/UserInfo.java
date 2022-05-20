@@ -19,10 +19,10 @@ public class UserInfo {
   @PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
   private String id;
 
-  @Column
+  @Column(value = "first_name")
   private String firstName;
 
-  @Column
+  @Column(value = "last_name")
   private String lastName;
 
   @Column

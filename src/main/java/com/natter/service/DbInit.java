@@ -6,7 +6,6 @@ import com.natter.model.user.UserInfo;
 import com.natter.repository.user.UserInfoRepository;
 import com.natter.repository.user.UserRepository;
 import com.natter.service.natter.NatterService;
-import com.natter.service.user.FollowService;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -25,9 +24,6 @@ public class DbInit {
 
   @Autowired
   UserInfoRepository userInfoRepository;
-
-  @Autowired
-  FollowService followService;
 
   @PostConstruct
   private void postConstruct() {

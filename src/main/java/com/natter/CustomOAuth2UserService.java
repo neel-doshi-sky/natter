@@ -24,7 +24,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
   private final UserInfoRepository userInfoRepository;
 
-
+  /**
+   * Override existing load user functionality to add user to database if not exists
+   *
+   * @param userRequest the user request
+   * @return the authenticated user
+   * @throws OAuth2AuthenticationException the OAuth2AuthenticationException exception
+   */
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
     OAuth2User oAuth2User = super.loadUser(userRequest);
