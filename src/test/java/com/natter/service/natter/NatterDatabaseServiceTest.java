@@ -65,11 +65,18 @@ class NatterDatabaseServiceTest {
 
   }
 
-//  @Test
-//  public void throwException_whenSaveToAuthorTableReturnsNoId(){
-//    when(natterByAuthorRepository.save(any())).thenThrow(new DatabaseErrorException(
-//        ErrorMessageEnum.UNABLE_TO_SAVE_RECORD));
-//    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.saveNatter("123", new NatterCreateRequest(), "123"));
-//  }
+  @Test
+  public void throwException_whenSaveToAuthorTableReturnsNoId(){
+    NatterByAuthor nullId = new NatterByAuthor();
+    when(natterByAuthorRepository.save(any())).thenReturn(nullId);
+    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.saveNatter("123", new NatterCreateRequest(), "123"));
+  }
+
+  @Test
+  public void throwException_whenSaveToIdTableReturnsNoId(){
+    NatterByAuthor nullId = new NatterByAuthor();
+    when(natterByAuthorRepository.save(any())).thenReturn(nullId);
+    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.saveNatter("123", new NatterCreateRequest(), "123"));
+  }
 
 }

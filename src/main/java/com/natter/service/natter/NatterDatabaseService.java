@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -29,6 +30,7 @@ public class NatterDatabaseService {
    * @return the created Natter
    * @throws DatabaseErrorException the database exception
    */
+  @Transactional
   public NatterById saveNatter(final @NonNull String timeId,
                                @NonNull final NatterCreateRequest natterCreateRequest,
                                @NonNull final String authorId) throws DatabaseErrorException {
