@@ -1,21 +1,22 @@
 package com.natter.service.natter;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
-import com.natter.model.natter.NatterListPrimaryKey;
+import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.repository.NatterByAuthorRepository;
 import com.natter.repository.NatterByIdRepository;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,12 +45,12 @@ class NatterDatabaseServiceTest {
     createdNatterById.setDateCreated(LocalDateTime.now());
     createdNatterById.setDateUpdated(createdNatterById.getDateCreated());
 
-    NatterListPrimaryKey natterListPrimaryKey = new NatterListPrimaryKey();
-    natterListPrimaryKey.setTimeId("123");
-    natterListPrimaryKey.setAuthorId("123");
+    NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
+    natterByAuthorPrimaryKey.setTimeId("123");
+    natterByAuthorPrimaryKey.setAuthorId("123");
 
     NatterByAuthor natterByAuthor = new NatterByAuthor();
-    natterByAuthor.setId(natterListPrimaryKey);
+    natterByAuthor.setId(natterByAuthorPrimaryKey);
     natterByAuthor.setBody("123 test");
     natterByAuthor.setCreated(LocalDateTime.now());
 

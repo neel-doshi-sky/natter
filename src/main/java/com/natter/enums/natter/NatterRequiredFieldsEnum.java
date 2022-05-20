@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum NatterRequiredFieldsEnum {
 
+  ID("id", false, null),
   BODY("body", false, 500L),
   PARENT_NATTER_ID("parentNatterId",true, null);
 

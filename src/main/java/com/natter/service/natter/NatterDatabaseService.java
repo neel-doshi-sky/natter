@@ -5,7 +5,7 @@ import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
-import com.natter.model.natter.NatterListPrimaryKey;
+import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.repository.NatterByAuthorRepository;
 import com.natter.repository.NatterByIdRepository;
 import java.time.LocalDateTime;
@@ -35,12 +35,12 @@ public class NatterDatabaseService {
                                @NonNull final NatterCreateRequest natterCreateRequest,
                                @NonNull final String authorId) throws DatabaseErrorException {
 
-    NatterListPrimaryKey natterListPrimaryKey = new NatterListPrimaryKey();
-    natterListPrimaryKey.setTimeId(timeId);
-    natterListPrimaryKey.setAuthorId(authorId);
+    NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
+    natterByAuthorPrimaryKey.setTimeId(timeId);
+    natterByAuthorPrimaryKey.setAuthorId(authorId);
 
     NatterByAuthor natterByAuthor = new NatterByAuthor();
-    natterByAuthor.setId(natterListPrimaryKey);
+    natterByAuthor.setId(natterByAuthorPrimaryKey);
     natterByAuthor.setBody(natterCreateRequest.getBody());
     natterByAuthor.setCreated(LocalDateTime.now());
 
@@ -71,7 +71,7 @@ public class NatterDatabaseService {
    */
   public void deleteNatter(@NonNull final String idToDelete, @NonNull final String authorId) {
     natterByIdRepository.deleteById(idToDelete);
-    NatterListPrimaryKey key = new NatterListPrimaryKey();
+    NatterByAuthorPrimaryKey key = new NatterByAuthorPrimaryKey();
     key.setTimeId(idToDelete);
     key.setAuthorId(authorId);
     natterByAuthorRepository.deleteById(key);

@@ -11,7 +11,7 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 @Data
 @PrimaryKeyClass
 @NoArgsConstructor
-public class NatterListPrimaryKey {
+public class NatterByAuthorPrimaryKey {
 
   @PrimaryKeyColumn(name = "authorId", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
   private String authorId;

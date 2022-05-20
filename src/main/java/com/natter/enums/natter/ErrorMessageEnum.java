@@ -18,6 +18,6 @@ public enum ErrorMessageEnum {
   UNAUTHORISED_ACCESS_NATTER("50003", "unauthorised access to this natter or natter does not exist");
 
 
-  private final String errorCode;
+  private final String code;
   private final String message;
 }

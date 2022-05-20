@@ -12,7 +12,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 public class NatterByAuthor {
 
   @PrimaryKey
-  private NatterListPrimaryKey id;
+  private NatterByAuthorPrimaryKey id;
 
   @CassandraType(type = CassandraType.Name.TEXT)
   private String body;
