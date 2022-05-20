@@ -27,14 +27,14 @@ public class UserController {
   @PostMapping(value = "/follow/{id}")
   public ResponseEntity<ResponseDto> followUserById(@AuthenticationPrincipal OAuth2User principal,
                                                     @PathVariable(value = "id") String id) {
-    ResponseDto response = userService.followUserById(authService.getUserIdFromAuth(principal), id, true);
+    ResponseDto response = userService.followOrUnfollowUserById(authService.getUserIdFromAuth(principal), id, true);
     return new ResponseEntity<>(response, response.getStatus());
   }
 
   @PostMapping(value = "/unfollow/{id}")
   public ResponseEntity<ResponseDto> unfollowUserById(@AuthenticationPrincipal OAuth2User principal,
                                                     @PathVariable(value = "id") String id) {
-    ResponseDto response = userService.followUserById(authService.getUserIdFromAuth(principal), id, false);
+    ResponseDto response = userService.followOrUnfollowUserById(authService.getUserIdFromAuth(principal), id, false);
     return new ResponseEntity<>(response, response.getStatus());
   }
 }

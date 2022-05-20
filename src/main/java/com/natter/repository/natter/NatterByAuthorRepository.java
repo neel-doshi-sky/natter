@@ -1,4 +1,4 @@
-package com.natter.repository;
+package com.natter.repository.natter;
 
 import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterByAuthorPrimaryKey;

@@ -1,4 +1,4 @@
-package com.natter.repository;
+package com.natter.repository.user;
 
 import com.natter.model.user.UserInfo;
 import org.springframework.data.cassandra.repository.CassandraRepository;

@@ -1,6 +1,6 @@
 package com.natter.service.user;
 
-import com.natter.repository.UserRepository;
+import com.natter.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -8,16 +8,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDatabaseService {
 
-  private final UserRepository userRepository;
+  private final FollowService followService;
 
   void updateFollowersForFollow(String authorId, String userToFollowId){
-    userRepository.addUserToFollowerList(userToFollowId, authorId);
-    userRepository.addUserToFollowingList(userToFollowId, authorId);
+    followService.addUserToFollowerList(authorId, userToFollowId);
+    followService.addUserToFollowingList(authorId, userToFollowId);
 
   }
 
-  void updateFollowersForUnfollow(String authorId, String userToFollowId){
-    userRepository.removeUserFromFollowerList(userToFollowId, authorId);
-    userRepository.removeUserFromFollowingList(userToFollowId, authorId);
+  void updateFollowersForUnfollow(String authorId, String userToUnfollowId){
+    followService.removeUserFromFollowerList(authorId, userToUnfollowId);
+    followService.removeUserFromFollowingList(authorId, userToUnfollowId);
   }
 }

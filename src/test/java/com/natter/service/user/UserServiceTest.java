@@ -9,12 +9,9 @@ import static org.mockito.Mockito.when;
 import com.natter.dto.ResponseDto;
 import com.natter.enums.user.ErrorMessageUserEnum;
 import com.natter.enums.user.SuccessMessageUserEnum;
-import com.natter.model.user.User;
 import com.natter.model.user.UserInfo;
-import com.natter.repository.UserInfoRepository;
-import com.natter.repository.UserRepository;
-import java.time.LocalDateTime;
-import java.util.HashSet;
+import com.natter.repository.user.UserInfoRepository;
+import com.natter.repository.user.UserRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +35,7 @@ class UserServiceTest {
   public void whenValidId_FollowUser_ReturnSuccessMessage(){
     Optional<UserInfo> userOptional = Optional.of( new UserInfo("1", "test", "user1", "test_user1@gmail.com"));
     when(userInfoRepository.findById(anyString())).thenReturn(userOptional);
-    ResponseDto responseDto = userService.followUserById("123", "1", true);
+    ResponseDto responseDto = userService.followOrUnfollowUserById("123", "1", true);
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(1, responseDto.getUserMessages().size()),
@@ -51,7 +48,7 @@ class UserServiceTest {
   public void whenValidId_UnFollowUser_ReturnSuccessMessage(){
     Optional<UserInfo> userOptional = Optional.of( new UserInfo("1", "test", "user1", "test_user1@gmail.com"));
     when(userInfoRepository.findById(anyString())).thenReturn(userOptional);
-    ResponseDto responseDto = userService.followUserById("123", "1", false);
+    ResponseDto responseDto = userService.followOrUnfollowUserById("123", "1", false);
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(1, responseDto.getUserMessages().size()),
@@ -63,7 +60,7 @@ class UserServiceTest {
   @Test
   public void whenInValidId_SkipFollowUser_ReturnErrorMessage(){
     when(userInfoRepository.findById(anyString())).thenReturn(Optional.empty());
-    ResponseDto responseDto = userService.followUserById("123", "1", true);
+    ResponseDto responseDto = userService.followOrUnfollowUserById("123", "1", true);
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
@@ -75,7 +72,7 @@ class UserServiceTest {
 
   @Test
   public void whenNullId_SkipFollowUser_ReturnErrorMessage(){
-    ResponseDto responseDto = userService.followUserById("123", null, true);
+    ResponseDto responseDto = userService.followOrUnfollowUserById("123", null, true);
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),

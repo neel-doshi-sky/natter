@@ -3,13 +3,10 @@ package com.natter.service.user;
 import com.natter.dto.ResponseDto;
 import com.natter.enums.user.ErrorMessageUserEnum;
 import com.natter.enums.user.SuccessMessageUserEnum;
-import com.natter.model.user.User;
 import com.natter.model.user.UserInfo;
-import com.natter.repository.UserInfoRepository;
-import com.natter.repository.UserRepository;
+import com.natter.repository.user.UserInfoRepository;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +20,7 @@ public class UserService {
   private final UserInfoRepository userInfoRepository;
   private final UserDatabaseService userDatabaseService;
 
-  public ResponseDto followUserById(String authUserId, String id, boolean isFollow) {
+  public ResponseDto followOrUnfollowUserById(String authUserId, String id, boolean isFollow) {
     ResponseDto response = new ResponseDto();
     if(id == null){
       response.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_ID_NULL.getCode(),

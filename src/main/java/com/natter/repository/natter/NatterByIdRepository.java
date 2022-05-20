@@ -1,4 +1,4 @@
-package com.natter.repository;
+package com.natter.repository.natter;
 
 import com.natter.model.natter.NatterById;
 import java.time.LocalDateTime;

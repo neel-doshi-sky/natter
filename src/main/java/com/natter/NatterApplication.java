@@ -14,24 +14,11 @@ public class NatterApplication {
 	}
 
 	@Bean
-	public CqlSessionBuilderCustomizer sessionBuilderCustomizer(DataStaxAstraProperties astraProperties) {
+	public CqlSessionBuilderCustomizer sessionBuilderCustomizer(
+			DataStaxAstraProperties astraProperties) {
 		Path bundle = astraProperties.getSecureConnectBundle().toPath();
 		return builder -> builder.withCloudSecureConnectBundle(bundle);
 	}
-
-//	@Bean
-//	public FilterRegistrationBean<CorsFilter> simpleCorsFilter() {
-//		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//		CorsConfiguration config = new CorsConfiguration();
-//		config.setAllowCredentials(true);
-//		config.setAllowedOrigins(List.of("http://localhost:8080"));
-//		config.setAllowedMethods(Collections.singletonList("*"));
-//		config.setAllowedHeaders(Collections.singletonList("*"));
-//		source.registerCorsConfiguration("/**", config);
-//		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
-//		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-//		return bean;
-//	}
 
 
 
