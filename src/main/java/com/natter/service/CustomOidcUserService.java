@@ -2,6 +2,8 @@ package com.natter.service;
 
 import com.natter.model.GoogleUserInfo;
 import com.natter.model.user.User;
+import com.natter.model.user.UserInfo;
+import com.natter.repository.UserInfoRepository;
 import com.natter.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -20,6 +22,9 @@ public class CustomOidcUserService extends OidcUserService {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private UserInfoRepository userInfoRepository;
 
   @Override
   public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -42,11 +47,11 @@ public class CustomOidcUserService extends OidcUserService {
       User user =
           new User(googleUserInfo.getId(), oidcUser.getGivenName(), oidcUser.getFamilyName(),
               oidcUser.getEmail(), new HashSet<>(), new HashSet<>(), LocalDateTime.now());
-
-
-      // set other needed data
+      UserInfo userInfo = new UserInfo(googleUserInfo.getId(), oidcUser.getGivenName(), oidcUser.getFamilyName(), oidcUser.getEmail());
 
       userRepository.save(user);
+      userInfoRepository.save(userInfo);
+
     }
 
     return oidcUser;

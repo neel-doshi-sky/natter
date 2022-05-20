@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @RequiredArgsConstructor
 @ToString
-public enum ErrorMessageEnum {
+public enum ErrorMessageNatterEnum {
 
   NATTER_CREATION_ERROR_NULL_BODY("00001","null natter body passed"),
   NATTER_NULL_ID("OOOO2", "id cannot be null"),

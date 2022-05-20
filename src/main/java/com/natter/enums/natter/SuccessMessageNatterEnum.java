@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum SuccessMessageEnum {
+public enum SuccessMessageNatterEnum {
 
   CREATED_NEW_NATTER("10000", "Successfully created natter"),
   DELETED_NATTER("10001", "Successfully deleted natter"),

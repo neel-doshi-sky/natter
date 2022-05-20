@@ -1,6 +1,6 @@
 package com.natter.controller;
 
-import com.natter.dto.BaseResponseDto;
+import com.natter.dto.ResponseDto;
 import com.natter.dto.NatterCreateResponseDto;
 import com.natter.dto.NatterListResponseDto;
 import com.natter.model.natter.NatterCreateRequest;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +22,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "http://localhost:8080")
@@ -78,9 +78,9 @@ public class NatterController {
    * @return response entity containing result of operation
    */
   @DeleteMapping(value = "/{id}")
-  public ResponseEntity<BaseResponseDto> delete(@AuthenticationPrincipal OAuth2User principal,
-                                                @PathVariable String id) {
-    BaseResponseDto result = natterService.delete(id, authService.getUserIdFromAuth(principal));
+  public ResponseEntity<ResponseDto> delete(@AuthenticationPrincipal OAuth2User principal,
+                                            @PathVariable String id) {
+    ResponseDto result = natterService.delete(id, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
   }
 
@@ -93,9 +93,9 @@ public class NatterController {
    */
   @ResponseBody
   @PutMapping(value = "/")
-  public ResponseEntity<BaseResponseDto> edit(@AuthenticationPrincipal OAuth2User principal,
-                                              @RequestBody NatterUpdateRequest updateRequest) {
-    BaseResponseDto result =
+  public ResponseEntity<ResponseDto> edit(@AuthenticationPrincipal OAuth2User principal,
+                                          @RequestBody NatterUpdateRequest updateRequest) {
+    ResponseDto result =
         natterService.edit(updateRequest, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
 

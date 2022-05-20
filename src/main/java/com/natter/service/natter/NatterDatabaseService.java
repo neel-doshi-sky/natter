@@ -1,6 +1,6 @@
 package com.natter.service.natter;
 
-import com.natter.enums.natter.ErrorMessageEnum;
+import com.natter.enums.natter.ErrorMessageNatterEnum;
 import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterByAuthorPrimaryKey;
@@ -48,7 +48,7 @@ public class NatterDatabaseService {
 
     NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
     if (natterByAuthorCreated.getId() == null) {
-      throw new DatabaseErrorException(ErrorMessageEnum.UNABLE_TO_SAVE_RECORD);
+      throw new DatabaseErrorException(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD);
     }
 
     NatterById natterById = new NatterById();
@@ -61,7 +61,7 @@ public class NatterDatabaseService {
     natterById.setParentNatterId(null);
     NatterById createdNatter = natterByIdRepository.save(natterById);
     if (createdNatter.getId() == null) {
-      throw new DatabaseErrorException(ErrorMessageEnum.UNABLE_TO_SAVE_RECORD);
+      throw new DatabaseErrorException(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD);
     }
     return createdNatter;
   }

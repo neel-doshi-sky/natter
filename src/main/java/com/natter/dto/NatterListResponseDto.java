@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NatterListResponseDto extends BaseResponseDto{
+public class NatterListResponseDto extends ResponseDto {
 
   private List<NatterByAuthor> natterByAuthors = new ArrayList<>();
 }

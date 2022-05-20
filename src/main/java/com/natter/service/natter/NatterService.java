@@ -1,11 +1,11 @@
 package com.natter.service.natter;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
-import com.natter.dto.BaseResponseDto;
+import com.natter.dto.ResponseDto;
 import com.natter.dto.NatterCreateResponseDto;
 import com.natter.dto.NatterListResponseDto;
-import com.natter.enums.natter.ErrorMessageEnum;
-import com.natter.enums.natter.SuccessMessageEnum;
+import com.natter.enums.natter.ErrorMessageNatterEnum;
+import com.natter.enums.natter.SuccessMessageNatterEnum;
 import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterByAuthorPrimaryKey;
@@ -45,8 +45,8 @@ public class NatterService {
     NatterCreateResponseDto response = new NatterCreateResponseDto();
     if (natterCreateRequest == null) {
       response.setStatus(HttpStatus.BAD_REQUEST);
-      response.setErrorMessages(Map.of(ErrorMessageEnum.NATTER_CREATION_ERROR_NULL_BODY.getCode(),
-          ErrorMessageEnum.NATTER_CREATION_ERROR_NULL_BODY.getMessage()));
+      response.setErrorMessages(Map.of(ErrorMessageNatterEnum.NATTER_CREATION_ERROR_NULL_BODY.getCode(),
+          ErrorMessageNatterEnum.NATTER_CREATION_ERROR_NULL_BODY.getMessage()));
     } else {
       Map<String, String> validationResult =
           validationService.validateNatterCreateBody(natterCreateRequest);
@@ -58,9 +58,9 @@ public class NatterService {
               natterDatabaseService.create(timeId.toString(), natterCreateRequest, authorId);
           response.setNatterById(created);
           response.setStatus(HttpStatus.OK);
-          response.setUserMessages(Map.of(SuccessMessageEnum.CREATED_NEW_NATTER.getCode(), SuccessMessageEnum.CREATED_NEW_NATTER.getMessage()));
+          response.setUserMessages(Map.of(SuccessMessageNatterEnum.CREATED_NEW_NATTER.getCode(), SuccessMessageNatterEnum.CREATED_NEW_NATTER.getMessage()));
         } catch (DatabaseErrorException e){
-          response.setErrorMessages(Map.of(e.getErrorMessageEnum().getCode(), e.getErrorMessageEnum().getMessage()));
+          response.setErrorMessages(Map.of(e.getErrorMessageNatterEnum().getCode(), e.getErrorMessageNatterEnum().getMessage()));
           log.error("Error saving natter to db");
         }
       } else {
@@ -80,11 +80,11 @@ public class NatterService {
    * @param authorId the author id
    * @return the response
    */
-  public BaseResponseDto delete(String idToDelete, @NonNull String authorId) {
-    BaseResponseDto response = new BaseResponseDto();
+  public ResponseDto delete(String idToDelete, @NonNull String authorId) {
+    ResponseDto response = new ResponseDto();
 
     if(idToDelete == null){
-      response.setErrorMessages(Map.of(ErrorMessageEnum.NATTER_NULL_ID.getCode(), ErrorMessageEnum.NATTER_NULL_ID.getMessage()));
+      response.setErrorMessages(Map.of(ErrorMessageNatterEnum.NATTER_NULL_ID.getCode(), ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage()));
       response.setStatus(HttpStatus.BAD_REQUEST);
 
     } else {
@@ -93,13 +93,13 @@ public class NatterService {
        if(foundById.get().getAuthorId().equals(authorId)) {
          natterDatabaseService.delete(idToDelete, authorId);
          response.setStatus(HttpStatus.OK);
-         response.setUserMessages(Map.of(SuccessMessageEnum.DELETED_NATTER.getCode(), SuccessMessageEnum.DELETED_NATTER.getMessage()));
+         response.setUserMessages(Map.of(SuccessMessageNatterEnum.DELETED_NATTER.getCode(), SuccessMessageNatterEnum.DELETED_NATTER.getMessage()));
        } else {
-         response.setErrorMessages(Map.of(ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getCode(), ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
+         response.setErrorMessages(Map.of(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode(), ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
          response.setStatus(HttpStatus.FORBIDDEN);
        }
       } else {
-        response.setErrorMessages(Map.of(ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getCode(), ErrorMessageEnum.UNABLE_TO_DELETE_RECORD.getMessage()));
+        response.setErrorMessages(Map.of(ErrorMessageNatterEnum.UNABLE_TO_DELETE_RECORD.getCode(), ErrorMessageNatterEnum.UNABLE_TO_DELETE_RECORD.getMessage()));
         response.setStatus(HttpStatus.FORBIDDEN);
       }
     }
@@ -120,8 +120,8 @@ public class NatterService {
     natterListResponseDto.setNatterByAuthors(natterByAuthor);
     natterListResponseDto.setStatus(HttpStatus.OK);
     natterListResponseDto.setUserMessages(
-        Map.of(SuccessMessageEnum.FETCHED_NATTERS_BY_AUTHOR.getCode(),
-            SuccessMessageEnum.FETCHED_NATTERS_BY_AUTHOR.getMessage()));
+        Map.of(SuccessMessageNatterEnum.FETCHED_NATTERS_BY_AUTHOR.getCode(),
+            SuccessMessageNatterEnum.FETCHED_NATTERS_BY_AUTHOR.getMessage()));
     return natterListResponseDto;
   }
 
@@ -132,7 +132,7 @@ public class NatterService {
    * @param authorId      the authenticated user
    * @return the response dto containing result of operation
    */
-  public BaseResponseDto edit(final NatterUpdateRequest updateRequest, final String authorId) {
+  public ResponseDto edit(final NatterUpdateRequest updateRequest, final String authorId) {
     NatterCreateResponseDto responseDto = new NatterCreateResponseDto();
     Map<String, String> validationResult =
         validationService.validateNatterUpdateBody(updateRequest);
@@ -141,12 +141,12 @@ public class NatterService {
           new NatterByAuthorPrimaryKey(authorId, updateRequest.getId()));
       if (natterByAuthorOptional.isPresent()) {
         natterDatabaseService.update(updateRequest, authorId);
-        responseDto.setUserMessages(Map.of(SuccessMessageEnum.UPDATED_NATTER.getCode(),
-            SuccessMessageEnum.UPDATED_NATTER.getMessage()));
+        responseDto.setUserMessages(Map.of(SuccessMessageNatterEnum.UPDATED_NATTER.getCode(),
+            SuccessMessageNatterEnum.UPDATED_NATTER.getMessage()));
         responseDto.setStatus(HttpStatus.OK);
       } else {
-        responseDto.setErrorMessages(Map.of(ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getCode(),
-            ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
+        responseDto.setErrorMessages(Map.of(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode(),
+            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
         responseDto.setStatus(HttpStatus.FORBIDDEN);
       }
     } else {

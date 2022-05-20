@@ -1,6 +1,6 @@
 package com.natter.exception;
 
-import com.natter.enums.natter.ErrorMessageEnum;
+import com.natter.enums.natter.ErrorMessageNatterEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,5 +9,5 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class DatabaseErrorException extends Exception{
-  ErrorMessageEnum errorMessageEnum;
+  ErrorMessageNatterEnum errorMessageNatterEnum;
 }

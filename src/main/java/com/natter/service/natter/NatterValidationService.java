@@ -1,6 +1,6 @@
 package com.natter.service.natter;
 
-import com.natter.enums.natter.ErrorMessageEnum;
+import com.natter.enums.natter.ErrorMessageNatterEnum;
 import com.natter.enums.natter.NatterRequiredFieldsEnum;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
@@ -59,12 +59,12 @@ public class NatterValidationService {
     Map<String, String> errorMessage = new HashMap<>();
     if (field == null && !natterRequiredFieldsEnum.isNullable()) {
       errorMessage.put(natterRequiredFieldsEnum.getField(),
-          ErrorMessageEnum.NULL_OR_EMPTY_FIELD.getMessage());
+          ErrorMessageNatterEnum.NULL_OR_EMPTY_FIELD.getMessage());
     } else if (natterRequiredFieldsEnum.getCharacterLimit() != null &&
         (field != null && field.length() > natterRequiredFieldsEnum.getCharacterLimit())) {
       long exceeded = field.length() - natterRequiredFieldsEnum.getCharacterLimit();
       errorMessage.put(natterRequiredFieldsEnum.getField(),
-          ErrorMessageEnum.EXCEEDED_CHAR_LIMIT.getMessage() + exceeded);
+          ErrorMessageNatterEnum.EXCEEDED_CHAR_LIMIT.getMessage() + exceeded);
     }
     return errorMessage;
   }
