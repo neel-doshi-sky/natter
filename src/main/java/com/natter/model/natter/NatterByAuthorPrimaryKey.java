@@ -15,10 +15,10 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 @AllArgsConstructor
 public class NatterByAuthorPrimaryKey {
 
-  @PrimaryKeyColumn(name = "authorId", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
+  @PrimaryKeyColumn(name = "author_id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
   private String authorId;
 
-  @PrimaryKeyColumn(name = "created_time_uuid", ordinal = 2, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
+  @PrimaryKeyColumn(name = "id", ordinal = 1, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
   @CassandraType(type = CassandraType.Name.TEXT)
   private String id;
 }

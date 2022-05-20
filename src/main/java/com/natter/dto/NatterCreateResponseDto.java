@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NatterCreateUpdateResponseDto extends BaseResponseDto {
+public class NatterCreateResponseDto extends BaseResponseDto {
 
   private NatterById natterById;
 }

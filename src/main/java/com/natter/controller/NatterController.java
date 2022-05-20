@@ -1,7 +1,7 @@
 package com.natter.controller;
 
 import com.natter.dto.BaseResponseDto;
-import com.natter.dto.NatterCreateUpdateResponseDto;
+import com.natter.dto.NatterCreateResponseDto;
 import com.natter.dto.NatterListResponseDto;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
@@ -60,11 +60,11 @@ public class NatterController {
    */
   @ResponseBody
   @PostMapping(value = "/")
-  public ResponseEntity<NatterCreateUpdateResponseDto> create(
+  public ResponseEntity<NatterCreateResponseDto> create(
       @AuthenticationPrincipal OAuth2User principal,
       @RequestBody NatterCreateRequest natterCreateRequest) {
 
-    NatterCreateUpdateResponseDto result =
+    NatterCreateResponseDto result =
         natterService.create(natterCreateRequest, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
 
@@ -84,11 +84,19 @@ public class NatterController {
     return new ResponseEntity<>(result, result.getStatus());
   }
 
+  /**
+   * Endpoint to edit an existing natter
+   *
+   * @param principal     the authenticated user
+   * @param updateRequest the update request body
+   * @return the response entity containing result of operation
+   */
   @ResponseBody
   @PutMapping(value = "/")
-  public ResponseEntity<NatterCreateUpdateResponseDto> edit(@AuthenticationPrincipal OAuth2User principal,
-                                                            @RequestBody NatterUpdateRequest updateRequest){
-    NatterCreateUpdateResponseDto result = natterService.edit(updateRequest, authService.getUserIdFromAuth(principal));
+  public ResponseEntity<BaseResponseDto> edit(@AuthenticationPrincipal OAuth2User principal,
+                                              @RequestBody NatterUpdateRequest updateRequest) {
+    BaseResponseDto result =
+        natterService.edit(updateRequest, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
 
   }

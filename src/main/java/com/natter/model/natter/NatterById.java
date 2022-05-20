@@ -21,15 +21,17 @@ public class NatterById {
   @CassandraType(type = CassandraType.Name.TEXT)
   private String body;
 
+  @Column(value = "parent_natter_id")
   @CassandraType(type = CassandraType.Name.TEXT)
   private String parentNatterId;
 
-  @Column
+  @Column(value = "date_created")
   private LocalDateTime dateCreated;
 
-  @Column
+  @Column(value = "date_updated")
   private LocalDateTime dateUpdated;
 
   @CassandraType(type = CassandraType.Name.TEXT)
+  @Column(value = "author_id")
   private String authorId;
 }

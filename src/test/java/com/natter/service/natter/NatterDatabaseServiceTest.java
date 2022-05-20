@@ -52,7 +52,7 @@ class NatterDatabaseServiceTest {
     NatterByAuthor natterByAuthor = new NatterByAuthor();
     natterByAuthor.setId(natterByAuthorPrimaryKey);
     natterByAuthor.setBody("123 test");
-    natterByAuthor.setCreated(LocalDateTime.now());
+    natterByAuthor.setDateCreated(LocalDateTime.now());
 
     when(natterByAuthorRepository.save(any())).thenReturn(natterByAuthor);
     when(natterByIdRepository.save(any())).thenReturn(createdNatterById);

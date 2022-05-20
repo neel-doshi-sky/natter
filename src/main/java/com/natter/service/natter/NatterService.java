@@ -2,7 +2,7 @@ package com.natter.service.natter;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.natter.dto.BaseResponseDto;
-import com.natter.dto.NatterCreateUpdateResponseDto;
+import com.natter.dto.NatterCreateResponseDto;
 import com.natter.dto.NatterListResponseDto;
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.enums.natter.SuccessMessageEnum;
@@ -37,18 +37,20 @@ public class NatterService {
   /**
    * Method to create a natter item and save it to the database
    *
-   * @param natterCreateRequest  the create natterCreateRequest body
-   * @param authorId the author id
+   * @param natterCreateRequest the create natterCreateRequest body
+   * @param authorId            the author id
    * @return the result of the operation with any errors
    */
-  public NatterCreateUpdateResponseDto create(NatterCreateRequest natterCreateRequest, String authorId) {
-    NatterCreateUpdateResponseDto response = new NatterCreateUpdateResponseDto();
-    if(natterCreateRequest == null){
-       response.setStatus(HttpStatus.BAD_REQUEST);
-       response.setErrorMessages(Map.of(ErrorMessageEnum.NATTER_CREATION_ERROR_NULL_BODY.getCode(), ErrorMessageEnum.NATTER_CREATION_ERROR_NULL_BODY.getMessage()));
+  public NatterCreateResponseDto create(NatterCreateRequest natterCreateRequest, String authorId) {
+    NatterCreateResponseDto response = new NatterCreateResponseDto();
+    if (natterCreateRequest == null) {
+      response.setStatus(HttpStatus.BAD_REQUEST);
+      response.setErrorMessages(Map.of(ErrorMessageEnum.NATTER_CREATION_ERROR_NULL_BODY.getCode(),
+          ErrorMessageEnum.NATTER_CREATION_ERROR_NULL_BODY.getMessage()));
     } else {
-      Map<String, String> validationResult = validationService.validateNatterCreateBody(natterCreateRequest);
-      if(validationResult.isEmpty()) {
+      Map<String, String> validationResult =
+          validationService.validateNatterCreateBody(natterCreateRequest);
+      if (validationResult.isEmpty()) {
         UUID timeId = Uuids.timeBased();
 
         try {
@@ -130,15 +132,15 @@ public class NatterService {
    * @param authorId      the authenticated user
    * @return the response dto containing result of operation
    */
-  public NatterCreateUpdateResponseDto edit(final NatterUpdateRequest updateRequest, final String authorId) {
-    NatterCreateUpdateResponseDto responseDto = new NatterCreateUpdateResponseDto();
+  public BaseResponseDto edit(final NatterUpdateRequest updateRequest, final String authorId) {
+    NatterCreateResponseDto responseDto = new NatterCreateResponseDto();
     Map<String, String> validationResult =
         validationService.validateNatterUpdateBody(updateRequest);
     if (validationResult.isEmpty()) {
       Optional<NatterByAuthor> natterByAuthorOptional = natterByAuthorRepository.findById(
           new NatterByAuthorPrimaryKey(authorId, updateRequest.getId()));
       if (natterByAuthorOptional.isPresent()) {
-        natterDatabaseService.update(updateRequest);
+        natterDatabaseService.update(updateRequest, authorId);
         responseDto.setUserMessages(Map.of(SuccessMessageEnum.UPDATED_NATTER.getCode(),
             SuccessMessageEnum.UPDATED_NATTER.getMessage()));
         responseDto.setStatus(HttpStatus.OK);

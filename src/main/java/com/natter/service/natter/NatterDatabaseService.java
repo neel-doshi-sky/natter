@@ -43,7 +43,8 @@ public class NatterDatabaseService {
     NatterByAuthor natterByAuthor = new NatterByAuthor();
     natterByAuthor.setId(natterByAuthorPrimaryKey);
     natterByAuthor.setBody(natterCreateRequest.getBody());
-    natterByAuthor.setCreated(LocalDateTime.now());
+    natterByAuthor.setDateCreated(LocalDateTime.now());
+    natterByAuthor.setDateUpdated(natterByAuthor.getDateCreated());
 
     NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
     if (natterByAuthorCreated.getId() == null) {
@@ -55,7 +56,8 @@ public class NatterDatabaseService {
     natterById.setBody(natterCreateRequest.getBody());
     LocalDateTime now = LocalDateTime.now();
     natterById.setDateCreated(now);
-    natterById.setDateUpdated(now);
+    natterById.setDateUpdated(natterById.getDateCreated());
+    natterById.setAuthorId(authorId);
     natterById.setParentNatterId(null);
     NatterById createdNatter = natterByIdRepository.save(natterById);
     if (createdNatter.getId() == null) {
@@ -82,8 +84,11 @@ public class NatterDatabaseService {
    * Method to update natters from the relevant tables
    *
    * @param updateRequest the update request
+   * @param authorId the authorId
    */
-  public void update(@NonNull final NatterUpdateRequest updateRequest) {
-    natterByIdRepository.updateNatter(updateRequest.getId(), updateRequest.getBody());
+  public void update(@NonNull final NatterUpdateRequest updateRequest, @NonNull final String authorId) {
+
+    natterByIdRepository.updateNatter(updateRequest.getBody(), updateRequest.getId());
+    natterByAuthorRepository.updateNatter(updateRequest.getBody(), updateRequest.getId(), authorId);
   }
 }

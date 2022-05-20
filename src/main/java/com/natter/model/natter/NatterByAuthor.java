@@ -7,7 +7,7 @@ import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
-@Table("natter_by_author")
+@Table("natters_by_author")
 @Data
 public class NatterByAuthor {
 
@@ -17,6 +17,9 @@ public class NatterByAuthor {
   @CassandraType(type = CassandraType.Name.TEXT)
   private String body;
 
-  @Column
-  private LocalDateTime created;
+  @Column(value = "date_created")
+  private LocalDateTime dateCreated;
+
+  @Column(value = "date_updated")
+  private LocalDateTime dateUpdated;
 }

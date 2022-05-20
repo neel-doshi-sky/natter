@@ -25,6 +25,7 @@ public class DbInit {
     natterCreateRequest.setParentNatterId(null);
     natterCreateRequest.setBody("Test natter 1");
 
+
     NatterCreateRequest natterCreateRequest1 = new NatterCreateRequest();
     natterCreateRequest1.setParentNatterId(null);
     natterCreateRequest1.setBody("Test natter 2");
