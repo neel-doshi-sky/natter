@@ -3,9 +3,10 @@ package com.natter.service.natter;
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
+import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
-import com.natter.model.natter.NatterByAuthorPrimaryKey;
+import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.NatterByAuthorRepository;
 import com.natter.repository.NatterByIdRepository;
 import java.time.LocalDateTime;
@@ -24,19 +25,19 @@ public class NatterDatabaseService {
   /**
    * Method to save natters to all relevant tables
    *
-   * @param timeId              the id of the natter
+   * @param id                  the id of the natter
    * @param natterCreateRequest the natter create body
    * @param authorId            the id of the author
    * @return the created Natter
    * @throws DatabaseErrorException the database exception
    */
   @Transactional
-  public NatterById saveNatter(final @NonNull String timeId,
-                               @NonNull final NatterCreateRequest natterCreateRequest,
-                               @NonNull final String authorId) throws DatabaseErrorException {
+  public NatterById create(@NonNull final String id,
+                           @NonNull final NatterCreateRequest natterCreateRequest,
+                           @NonNull final String authorId) throws DatabaseErrorException {
 
     NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
-    natterByAuthorPrimaryKey.setTimeId(timeId);
+    natterByAuthorPrimaryKey.setId(id);
     natterByAuthorPrimaryKey.setAuthorId(authorId);
 
     NatterByAuthor natterByAuthor = new NatterByAuthor();
@@ -50,7 +51,7 @@ public class NatterDatabaseService {
     }
 
     NatterById natterById = new NatterById();
-    natterById.setId(timeId);
+    natterById.setId(id);
     natterById.setBody(natterCreateRequest.getBody());
     LocalDateTime now = LocalDateTime.now();
     natterById.setDateCreated(now);
@@ -69,11 +70,20 @@ public class NatterDatabaseService {
    * @param idToDelete the id to delete
    * @param authorId   the id of the user
    */
-  public void deleteNatter(@NonNull final String idToDelete, @NonNull final String authorId) {
+  public void delete(@NonNull final String idToDelete, @NonNull final String authorId) {
     natterByIdRepository.deleteById(idToDelete);
     NatterByAuthorPrimaryKey key = new NatterByAuthorPrimaryKey();
-    key.setTimeId(idToDelete);
+    key.setId(idToDelete);
     key.setAuthorId(authorId);
     natterByAuthorRepository.deleteById(key);
+  }
+
+  /**
+   * Method to update natters from the relevant tables
+   *
+   * @param updateRequest the update request
+   */
+  public void update(@NonNull final NatterUpdateRequest updateRequest) {
+    natterByIdRepository.updateNatter(updateRequest.getId(), updateRequest.getBody());
   }
 }

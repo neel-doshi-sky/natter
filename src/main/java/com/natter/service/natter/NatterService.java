@@ -7,9 +7,10 @@ import com.natter.dto.NatterListResponseDto;
 import com.natter.enums.natter.ErrorMessageEnum;
 import com.natter.enums.natter.SuccessMessageEnum;
 import com.natter.exception.DatabaseErrorException;
+import com.natter.model.natter.NatterByAuthor;
+import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
-import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.NatterByAuthorRepository;
 import com.natter.repository.NatterByIdRepository;
@@ -51,7 +52,8 @@ public class NatterService {
         UUID timeId = Uuids.timeBased();
 
         try {
-          NatterById created = natterDatabaseService.saveNatter(timeId.toString(), natterCreateRequest, authorId);
+          NatterById created =
+              natterDatabaseService.create(timeId.toString(), natterCreateRequest, authorId);
           response.setNatterById(created);
           response.setStatus(HttpStatus.OK);
           response.setUserMessages(Map.of(SuccessMessageEnum.CREATED_NEW_NATTER.getCode(), SuccessMessageEnum.CREATED_NEW_NATTER.getMessage()));
@@ -87,7 +89,7 @@ public class NatterService {
       Optional<NatterById> foundById = natterByIdRepository.findById(idToDelete);
       if(foundById.isPresent()) {
        if(foundById.get().getAuthorId().equals(authorId)) {
-         natterDatabaseService.deleteNatter(idToDelete, authorId);
+         natterDatabaseService.delete(idToDelete, authorId);
          response.setStatus(HttpStatus.OK);
          response.setUserMessages(Map.of(SuccessMessageEnum.DELETED_NATTER.getCode(), SuccessMessageEnum.DELETED_NATTER.getMessage()));
        } else {
@@ -115,12 +117,40 @@ public class NatterService {
         natterByAuthorRepository.findAllByAuthorId(authorId);
     natterListResponseDto.setNatterByAuthors(natterByAuthor);
     natterListResponseDto.setStatus(HttpStatus.OK);
-    natterListResponseDto.setUserMessages(Map.of(SuccessMessageEnum.FETCHED_NATTERS_BY_AUTHOR.getCode(), SuccessMessageEnum.FETCHED_NATTERS_BY_AUTHOR.getMessage()));
+    natterListResponseDto.setUserMessages(
+        Map.of(SuccessMessageEnum.FETCHED_NATTERS_BY_AUTHOR.getCode(),
+            SuccessMessageEnum.FETCHED_NATTERS_BY_AUTHOR.getMessage()));
     return natterListResponseDto;
   }
 
-  public NatterCreateUpdateResponseDto edit(NatterUpdateRequest updateRequest, String authorId) {
+  /**
+   * Method to edit natter body for the authenticated user
+   *
+   * @param updateRequest the update request
+   * @param authorId      the authenticated user
+   * @return the response dto containing result of operation
+   */
+  public NatterCreateUpdateResponseDto edit(final NatterUpdateRequest updateRequest, final String authorId) {
     NatterCreateUpdateResponseDto responseDto = new NatterCreateUpdateResponseDto();
+    Map<String, String> validationResult =
+        validationService.validateNatterUpdateBody(updateRequest);
+    if (validationResult.isEmpty()) {
+      Optional<NatterByAuthor> natterByAuthorOptional = natterByAuthorRepository.findById(
+          new NatterByAuthorPrimaryKey(authorId, updateRequest.getId()));
+      if (natterByAuthorOptional.isPresent()) {
+        natterDatabaseService.update(updateRequest);
+        responseDto.setUserMessages(Map.of(SuccessMessageEnum.UPDATED_NATTER.getCode(),
+            SuccessMessageEnum.UPDATED_NATTER.getMessage()));
+        responseDto.setStatus(HttpStatus.OK);
+      } else {
+        responseDto.setErrorMessages(Map.of(ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getCode(),
+            ErrorMessageEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
+        responseDto.setStatus(HttpStatus.FORBIDDEN);
+      }
+    } else {
+      responseDto.setErrorMessages(validationResult);
+      responseDto.setStatus(HttpStatus.BAD_REQUEST);
+    }
     return responseDto;
   }
 }

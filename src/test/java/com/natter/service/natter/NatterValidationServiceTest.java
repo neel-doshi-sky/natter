@@ -1,4 +1,4 @@
-package com.natter.service;
+package com.natter.service.natter;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.natter.enums.natter.NatterRequiredFieldsEnum;
 import com.natter.model.natter.NatterCreateRequest;
+import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.service.natter.NatterValidationService;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -56,6 +57,34 @@ class NatterValidationServiceTest {
     assertAll(
         () -> assertNotNull(result),
         () -> assertEquals(1, result.size())
+    );
+  }
+
+  @Test
+  public void whenInvalidUpdateBodyWithNullProperties_returnMissingFieldsWithErrors(){
+    NatterUpdateRequest natter = new NatterUpdateRequest();
+    natter.setBody(null);
+    natter.setId(null);
+
+    Map<String, String> result = validationService.validateNatterUpdateBody(natter);
+    assertAll(
+        () -> assertNotNull(result),
+        () -> assertEquals(2, result.size())
+    );
+
+
+  }
+
+  @Test
+  public void whenValidUpdateBody_returnEmptyErrorMap(){
+    NatterUpdateRequest natter = new NatterUpdateRequest();
+    natter.setBody("UPDATE");
+    natter.setId("123");
+
+    Map<String, String> result = validationService.validateNatterUpdateBody(natter);
+    assertAll(
+        () -> assertNotNull(result),
+        () -> assertTrue(result.isEmpty())
     );
   }
 

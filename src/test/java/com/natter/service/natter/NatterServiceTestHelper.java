@@ -1,4 +1,4 @@
-package com.natter.service;
+package com.natter.service.natter;
 
 import com.natter.model.natter.NatterByAuthor;
 import java.util.List;

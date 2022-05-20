@@ -46,7 +46,7 @@ class NatterDatabaseServiceTest {
     createdNatterById.setDateUpdated(createdNatterById.getDateCreated());
 
     NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
-    natterByAuthorPrimaryKey.setTimeId("123");
+    natterByAuthorPrimaryKey.setId("123");
     natterByAuthorPrimaryKey.setAuthorId("123");
 
     NatterByAuthor natterByAuthor = new NatterByAuthor();
@@ -56,7 +56,7 @@ class NatterDatabaseServiceTest {
 
     when(natterByAuthorRepository.save(any())).thenReturn(natterByAuthor);
     when(natterByIdRepository.save(any())).thenReturn(createdNatterById);
-    NatterById result = natterDatabaseService.saveNatter("123", new NatterCreateRequest(), "123");
+    NatterById result = natterDatabaseService.create("123", new NatterCreateRequest(), "123");
     assertAll(
         () -> assertNotNull(result),
         () -> assertEquals(createdNatterById.getId(), result.getId())
@@ -70,14 +70,14 @@ class NatterDatabaseServiceTest {
   public void throwException_whenSaveToAuthorTableReturnsNoId(){
     NatterByAuthor nullId = new NatterByAuthor();
     when(natterByAuthorRepository.save(any())).thenReturn(nullId);
-    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.saveNatter("123", new NatterCreateRequest(), "123"));
+    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), "123"));
   }
 
   @Test
   public void throwException_whenSaveToIdTableReturnsNoId(){
     NatterByAuthor nullId = new NatterByAuthor();
     when(natterByAuthorRepository.save(any())).thenReturn(nullId);
-    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.saveNatter("123", new NatterCreateRequest(), "123"));
+    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), "123"));
   }
 
 }
