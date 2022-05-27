@@ -1,8 +1,8 @@
 package com.natter.service.natter;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.natter.dto.CreateResponseDto;
 import com.natter.dto.ResponseDto;
-import com.natter.dto.natter.NatterCreateResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.enums.natter.ErrorMessageNatterEnum;
 import com.natter.enums.natter.SuccessMessageNatterEnum;
@@ -41,8 +41,8 @@ public class NatterService {
    * @param authorId            the author id
    * @return the result of the operation with any errors
    */
-  public NatterCreateResponseDto create(NatterCreateRequest natterCreateRequest, String authorId) {
-    NatterCreateResponseDto response = new NatterCreateResponseDto();
+  public CreateResponseDto<NatterById> create(NatterCreateRequest natterCreateRequest, String authorId) {
+    CreateResponseDto<NatterById> response = new CreateResponseDto<>();
     if (natterCreateRequest == null) {
       response.setStatus(HttpStatus.BAD_REQUEST);
       response.setErrorMessages(Map.of(ErrorMessageNatterEnum.NATTER_CREATION_ERROR_NULL_BODY.getCode(),
@@ -56,7 +56,7 @@ public class NatterService {
         try {
           NatterById created =
               natterDatabaseService.create(timeId.toString(), natterCreateRequest, authorId);
-          response.setNatterById(created);
+          response.setCreated(created);
           response.setStatus(HttpStatus.OK);
           response.setUserMessages(Map.of(SuccessMessageNatterEnum.CREATED_NEW_NATTER.getCode(), SuccessMessageNatterEnum.CREATED_NEW_NATTER.getMessage()));
         } catch (DatabaseErrorException e){
@@ -133,7 +133,7 @@ public class NatterService {
    * @return the response dto containing result of operation
    */
   public ResponseDto edit(final NatterUpdateRequest updateRequest, final String authorId) {
-    NatterCreateResponseDto responseDto = new NatterCreateResponseDto();
+    ResponseDto responseDto = new ResponseDto();
     Map<String, String> validationResult =
         validationService.validateNatterUpdateBody(updateRequest);
     if (validationResult.isEmpty()) {

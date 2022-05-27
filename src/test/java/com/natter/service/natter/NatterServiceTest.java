@@ -9,8 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.natter.dto.CreateResponseDto;
 import com.natter.dto.ResponseDto;
-import com.natter.dto.natter.NatterCreateResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.enums.natter.ErrorMessageNatterEnum;
 import com.natter.enums.natter.SuccessMessageNatterEnum;
@@ -58,7 +58,7 @@ class NatterServiceTest {
   @Test
   public void whenNatterIsNull_ReturnNoNatterToCreateMessageToUser() {
     NatterCreateRequest natter = null;
-    NatterCreateResponseDto response = natterService.create(natter, "123");
+    CreateResponseDto<NatterById> response = natterService.create(natter, "123");
     assertAll(
         () -> assertNotNull(response),
         () -> assertEquals(1, response.getErrorMessages().size()),
@@ -86,20 +86,20 @@ class NatterServiceTest {
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(new HashMap<>());
     when(natterDatabaseService.create(any(), any(), any())).thenReturn(createdNatterById);
 
-    NatterCreateResponseDto response = natterService.create(natterRequest, "123");
+    CreateResponseDto<NatterById> response = natterService.create(natterRequest, "123");
 
     assertAll(
         () -> assertNotNull(response),
         () -> assertEquals(1, response.getUserMessages().size()),
-        () -> assertEquals("12323", response.getNatterById().getId()),
+        () -> assertEquals("12323", response.getCreated().getId()),
         () -> assertEquals(SuccessMessageNatterEnum.CREATED_NEW_NATTER.getMessage(),
             response.getUserMessages().get(SuccessMessageNatterEnum.CREATED_NEW_NATTER.getCode())),
-        () -> assertEquals(natterRequest.getBody(), response.getNatterById().getBody()),
+        () -> assertEquals(natterRequest.getBody(), response.getCreated().getBody()),
         () -> assertEquals(natterRequest.getParentNatterId(),
-            response.getNatterById().getParentNatterId()),
-        () -> assertNotNull(response.getNatterById().getDateCreated()),
-        () -> assertNotNull(response.getNatterById().getDateUpdated()),
-        () -> assertNotNull(response.getNatterById().getAuthorId()),
+            response.getCreated().getParentNatterId()),
+        () -> assertNotNull(response.getCreated().getDateCreated()),
+        () -> assertNotNull(response.getCreated().getDateUpdated()),
+        () -> assertNotNull(response.getCreated().getAuthorId()),
         () -> assertTrue(response.getErrorMessages().isEmpty()));
 
 
@@ -115,7 +115,7 @@ class NatterServiceTest {
     errors.put("authorId", ErrorMessageNatterEnum.NULL_OR_EMPTY_FIELD.getMessage());
 
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(errors);
-    NatterCreateResponseDto
+    CreateResponseDto<NatterById>
         natterCreateResponseDto = natterService.create(natterRequest, "123");
     assertAll(
         () -> assertNotNull(natterCreateResponseDto),
@@ -126,7 +126,7 @@ class NatterServiceTest {
 
   @Test
   public void whenNullBodyPassedToCreate_returnNullBodyError(){
-    NatterCreateResponseDto natterCreateResponseDto = natterService.create(null, "123");
+    CreateResponseDto<NatterById> natterCreateResponseDto = natterService.create(null, "123");
     assertAll(
         () -> assertNotNull(natterCreateResponseDto),
         () -> assertNotNull(natterCreateResponseDto.getErrorMessages()),

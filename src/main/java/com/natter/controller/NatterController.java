@@ -1,9 +1,10 @@
 package com.natter.controller;
 
+import com.natter.dto.CreateResponseDto;
 import com.natter.dto.ResponseDto;
-import com.natter.dto.natter.NatterCreateResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.model.natter.NatterByAuthor;
+import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.service.AuthService;
@@ -61,11 +62,11 @@ public class NatterController {
    */
   @ResponseBody
   @PostMapping(value = "/")
-  public ResponseEntity<NatterCreateResponseDto> create(
+  public ResponseEntity<CreateResponseDto<NatterById>> create(
       @AuthenticationPrincipal OAuth2User principal,
       @RequestBody NatterCreateRequest natterCreateRequest) {
 
-    NatterCreateResponseDto result =
+    CreateResponseDto<NatterById> result =
         natterService.create(natterCreateRequest, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
 
