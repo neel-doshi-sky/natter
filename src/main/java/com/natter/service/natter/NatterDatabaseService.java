@@ -66,6 +66,26 @@ public class NatterDatabaseService {
     return createdNatter;
   }
 
+  public void updateNatterAfterComment(NatterById natter) throws DatabaseErrorException {
+    natter.setDateUpdated(LocalDateTime.now());
+
+    NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
+    natterByAuthorPrimaryKey.setId(natter.getId());
+    natterByAuthorPrimaryKey.setAuthorId(natter.getAuthorId());
+
+    NatterByAuthor natterByAuthor = new NatterByAuthor();
+    natterByAuthor.setId(natterByAuthorPrimaryKey);
+    natterByAuthor.setBody(natter.getBody());
+    natterByAuthor.setDateUpdated(LocalDateTime.now());
+
+    NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
+    if (natterByAuthorCreated.getId() == null) {
+      throw new DatabaseErrorException(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD);
+    }
+    natterByIdRepository.save(natter);
+
+  }
+
   /**
    * Method to delete natters from all required tables
    *
@@ -90,5 +110,9 @@ public class NatterDatabaseService {
 
     natterByIdRepository.updateNatter(updateRequest.getBody(), updateRequest.getId());
     natterByAuthorRepository.updateNatter(updateRequest.getBody(), updateRequest.getId(), authorId);
+  }
+
+  public NatterById addComment(String parentId, NatterCreateRequest commentRequest) {
+    return null;
   }
 }

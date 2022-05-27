@@ -1,7 +1,11 @@
 package com.natter.model.natter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
 import org.springframework.data.cassandra.core.mapping.CassandraType;
@@ -11,7 +15,13 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table(value = "natters_by_id")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class NatterById {
+
+  public NatterById(String id) {
+    this.id = id;
+  }
 
   @Id
   @PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
@@ -34,4 +44,8 @@ public class NatterById {
   @CassandraType(type = CassandraType.Name.TEXT)
   @Column(value = "author_id")
   private String authorId;
+
+  @CassandraType(type = CassandraType.Name.TEXT)
+  @Column
+  private List<String> comments = new ArrayList<>();
 }

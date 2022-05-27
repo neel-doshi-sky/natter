@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -152,6 +153,35 @@ public class NatterService {
     } else {
       responseDto.setErrorMessages(validationResult);
       responseDto.setStatus(HttpStatus.BAD_REQUEST);
+    }
+    return responseDto;
+  }
+
+  public CreateResponseDto<NatterById> addComment(NatterCreateRequest commentRequest, String authId) {
+    CreateResponseDto<NatterById> responseDto = new CreateResponseDto<>();
+    if(commentRequest.getParentNatterId() == null){
+      responseDto.setErrorMessages(Map.of(ErrorMessageNatterEnum.NATTER_NULL_ID.getCode(), ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage()));
+      responseDto.setStatus(HttpStatus.BAD_REQUEST);
+    } else {
+      Optional<NatterById> natterParentOptional = natterByIdRepository.findById(commentRequest.getParentNatterId());
+      if(natterParentOptional.isPresent()){
+        NatterById parentNatter = natterParentOptional.get();
+        NatterById comment = natterDatabaseService.addComment(parentNatter.getId(), commentRequest);
+        parentNatter.getComments().add(comment.getId());
+        try {
+          natterDatabaseService.updateNatterAfterComment(parentNatter);
+          responseDto.setStatus(HttpStatus.OK);
+          responseDto.setUserMessages(Map.of(SuccessMessageNatterEnum.CREATED_COMMENT.getCode(), SuccessMessageNatterEnum.CREATED_COMMENT.getMessage()));
+          responseDto.setCreated(comment);
+
+        } catch (DatabaseErrorException e){
+
+        }
+
+      } else {
+        responseDto.setErrorMessages(Map.of(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode(), ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
+        responseDto.setStatus(HttpStatus.BAD_REQUEST);
+      }
     }
     return responseDto;
   }
