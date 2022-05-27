@@ -10,8 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.natter.dto.ResponseDto;
-import com.natter.dto.NatterCreateResponseDto;
-import com.natter.dto.NatterListResponseDto;
+import com.natter.dto.natter.NatterCreateResponseDto;
+import com.natter.dto.ResponseListDto;
 import com.natter.enums.natter.ErrorMessageNatterEnum;
 import com.natter.enums.natter.SuccessMessageNatterEnum;
 import com.natter.exception.DatabaseErrorException;
@@ -190,10 +190,10 @@ class NatterServiceTest {
   public void whenListUserNatters_returnNatters(){
     List<NatterByAuthor> nattersToReturn = natterServiceTestHelper.getListOfNatters();
     when(natterByAuthorRepository.findAllByAuthorId(any())).thenReturn(nattersToReturn);
-    NatterListResponseDto responseDto = natterService.getNattersForUser("115826771724477311086");
+    ResponseListDto<NatterByAuthor> responseDto = natterService.getNattersForUser("115826771724477311086");
     assertAll(
         () -> assertNotNull(responseDto),
-        () -> assertEquals(nattersToReturn.size(), responseDto.getNatterByAuthors().size()),
+        () -> assertEquals(nattersToReturn.size(), responseDto.getList().size()),
         () -> assertEquals(1, responseDto.getUserMessages().size()),
         () -> assertEquals(SuccessMessageNatterEnum.FETCHED_NATTERS_BY_AUTHOR.getMessage(), responseDto.getUserMessages().get(
             SuccessMessageNatterEnum.FETCHED_NATTERS_BY_AUTHOR.getCode()))

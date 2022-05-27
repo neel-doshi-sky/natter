@@ -82,6 +82,11 @@ class UserServiceTest {
 
   }
 
+  @Test
+  public void whenGetFollowers_returnFollowers_ToUser(){
+
+  }
+
 
 
 }

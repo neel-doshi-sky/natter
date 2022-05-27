@@ -1,5 +1,6 @@
-package com.natter.dto;
+package com.natter.dto.natter;
 
+import com.natter.dto.ResponseDto;
 import com.natter.model.natter.NatterById;
 import lombok.Getter;
 import lombok.Setter;

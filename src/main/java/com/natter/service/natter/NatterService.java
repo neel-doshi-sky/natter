@@ -2,8 +2,8 @@ package com.natter.service.natter;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.natter.dto.ResponseDto;
-import com.natter.dto.NatterCreateResponseDto;
-import com.natter.dto.NatterListResponseDto;
+import com.natter.dto.natter.NatterCreateResponseDto;
+import com.natter.dto.ResponseListDto;
 import com.natter.enums.natter.ErrorMessageNatterEnum;
 import com.natter.enums.natter.SuccessMessageNatterEnum;
 import com.natter.exception.DatabaseErrorException;
@@ -113,11 +113,11 @@ public class NatterService {
    * @param authorId the user to get natters for
    * @return the dto containing natters
    */
-  public NatterListResponseDto getNattersForUser(String authorId) {
-    NatterListResponseDto natterListResponseDto = new NatterListResponseDto();
+  public ResponseListDto<NatterByAuthor> getNattersForUser(String authorId) {
+    ResponseListDto<NatterByAuthor> natterListResponseDto = new ResponseListDto<>();
     List<NatterByAuthor> natterByAuthor =
         natterByAuthorRepository.findAllByAuthorId(authorId);
-    natterListResponseDto.setNatterByAuthors(natterByAuthor);
+    natterListResponseDto.setList(natterByAuthor);
     natterListResponseDto.setStatus(HttpStatus.OK);
     natterListResponseDto.setUserMessages(
         Map.of(SuccessMessageNatterEnum.FETCHED_NATTERS_BY_AUTHOR.getCode(),
