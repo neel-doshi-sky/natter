@@ -3,16 +3,25 @@ package com.natter.service.user;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.natter.dto.ResponseDto;
+import com.natter.dto.ResponseListDto;
 import com.natter.enums.user.ErrorMessageUserEnum;
 import com.natter.enums.user.SuccessMessageUserEnum;
+import com.natter.model.user.User;
+import com.natter.model.user.UserFollowersFollowing;
 import com.natter.model.user.UserInfo;
+import com.natter.repository.user.UserFollowersFollowingRepository;
 import com.natter.repository.user.UserInfoRepository;
 import com.natter.repository.user.UserRepository;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,6 +39,12 @@ class UserServiceTest {
 
   @Mock
   UserDatabaseService userDatabaseService;
+
+  @Mock
+  UserRepository userRepository;
+
+  @Mock
+  UserFollowersFollowingRepository userFollowersFollowingRepository;
 
   @Test
   public void whenValidId_FollowUser_ReturnSuccessMessage(){
@@ -83,10 +98,60 @@ class UserServiceTest {
   }
 
   @Test
-  public void whenGetFollowers_returnFollowers_ToUser(){
-
+  public void whenGetFollowers_validIdPassed_returnFollowers_ToUser(){
+    List<UserFollowersFollowing> list = List.of(new UserFollowersFollowing("123", "Test", "1", 0, 0),
+        new UserFollowersFollowing("1234", "Test", "3", 2, 6),
+        new UserFollowersFollowing("1235", "Test", "5", 23, 54),
+        new UserFollowersFollowing("1236", "Test", "6", 46, 654),
+        new UserFollowersFollowing("1237", "Test", "7", 244, 4));
+    when(userRepository.findById(anyString())).thenReturn(Optional.of(new User("123", "Test", "1", "test", Set.of("1", "2", "3", "4", "5"), new HashSet<>(), LocalDateTime.now())));
+    when(userFollowersFollowingRepository.findAllById(anySet())).thenReturn(list);
+    ResponseListDto<UserFollowersFollowing> responseListDto = userService.getFollowersForUserId("123");
+    assertAll(
+        () -> assertNotNull(responseListDto),
+        () -> assertEquals(0, responseListDto.getErrorMessages().size()),
+        () -> assertEquals(5, responseListDto.getList().size())
+    );
   }
 
+  @Test
+  public void whenGetFollowers_idDoesNotExist_returnError(){
+    when(userRepository.findById(anyString())).thenReturn(Optional.empty());
+    ResponseListDto<UserFollowersFollowing> responseListDto = userService.getFollowersForUserId("123");
+    assertAll(
+        () -> assertNotNull(responseListDto),
+        () -> assertEquals(1, responseListDto.getErrorMessages().size()),
+        () -> assertEquals(0, responseListDto.getList().size())
+    );
+  }
+
+  @Test
+  public void whenGetFollowing_validIdPassed_returnFollowing_ToUser(){
+    List<UserFollowersFollowing> list = List.of(new UserFollowersFollowing("123", "Test", "1", 0, 0),
+        new UserFollowersFollowing("1234", "Test", "3", 2, 6),
+        new UserFollowersFollowing("1235", "Test", "5", 23, 54),
+        new UserFollowersFollowing("1236", "Test", "6", 46, 654),
+        new UserFollowersFollowing("1237", "Test", "7", 244, 4));
+    when(userRepository.findById(anyString())).thenReturn(Optional.of(new User("123", "Test", "1", "test", new HashSet<>(), Set.of("1", "2", "3", "4", "5"), LocalDateTime.now())));
+    when(userFollowersFollowingRepository.findAllById(anySet())).thenReturn(list);
+    ResponseListDto<UserFollowersFollowing> responseListDto = userService.getFollowingForUserId("123");
+    assertAll(
+        () -> assertNotNull(responseListDto),
+        () -> assertEquals(0, responseListDto.getErrorMessages().size()),
+        () -> assertEquals(5, responseListDto.getList().size())
+    );
+  }
+
+  @Test
+  public void whenGetFollowing_idDoesNotExist_returnError(){
+    when(userRepository.findById(anyString())).thenReturn(Optional.empty());
+    ResponseListDto<UserFollowersFollowing> responseListDto = userService.getFollowingForUserId("123");
+    assertAll(
+        () -> assertNotNull(responseListDto),
+        () -> assertEquals(1, responseListDto.getErrorMessages().size()),
+        () -> assertEquals(0, responseListDto.getList().size())
+    );
+  }
 
 
 }

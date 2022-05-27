@@ -1,6 +1,8 @@
 package com.natter.service.user;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.natter.model.user.UserFollowersFollowing;
+import com.natter.repository.user.UserFollowersFollowingRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Service;
 public class UpdateFollowerService {
 
   private final CqlSession session;
+
+  private final UserFollowersFollowingRepository userFollowersFollowingRepository;
 
   /**
    * Add user to follower list
@@ -52,8 +56,6 @@ public class UpdateFollowerService {
     session.execute(query);
   }
 
-  ;
-
 
   /**
    * Remove follower from following
@@ -68,6 +70,30 @@ public class UpdateFollowerService {
     session.execute(query);
   }
 
-  ;
+  /**
+   * Method to increment or decrement the follower count for a given user
+   *
+   * @param user      the user to update
+   * @param increment the operation, if true then will increment, else decrement
+   */
+  public void updateFollowerCount(UserFollowersFollowing user, boolean increment) {
+    int newFollowerCount = increment ? user.getFollowers() + 1 : user.getFollowers() - 1;
+    user.setFollowers(newFollowerCount);
+    userFollowersFollowingRepository.save(user);
+
+  }
+
+  /**
+   * Method to increment or decrement the following count for a given user
+   *
+   * @param user      the user to update
+   * @param increment the operation, if true then will increment, else decrement
+   */
+  public void updateFollowingCount(UserFollowersFollowing user, boolean increment) {
+    int newFollowingCount = increment ? user.getFollowing() + 1 : user.getFollowing() - 1;
+    user.setFollowing(newFollowingCount);
+    userFollowersFollowingRepository.save(user);
+  }
+
 
 }

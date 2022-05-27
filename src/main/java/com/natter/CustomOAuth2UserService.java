@@ -2,7 +2,9 @@ package com.natter;
 
 import com.natter.model.GoogleUserInfo;
 import com.natter.model.user.User;
+import com.natter.model.user.UserFollowersFollowing;
 import com.natter.model.user.UserInfo;
+import com.natter.repository.user.UserFollowersFollowingRepository;
 import com.natter.repository.user.UserInfoRepository;
 import com.natter.repository.user.UserRepository;
 import java.time.LocalDateTime;
@@ -23,6 +25,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
   private final UserRepository userRepository;
 
   private final UserInfoRepository userInfoRepository;
+
+  private final UserFollowersFollowingRepository userFollowersFollowingRepository;
 
   /**
    * Override existing load user functionality to add user to database if not exists
@@ -66,8 +70,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           new UserInfo(googleUserInfo.getId(), givenName, familyName,
               googleUserInfo.getEmail());
 
+      UserFollowersFollowing userFollowersFollowing = new UserFollowersFollowing(googleUserInfo.getId(), givenName, familyName, 0, 0);
       userRepository.save(user);
       userInfoRepository.save(userInfo);
+      userFollowersFollowingRepository.save(userFollowersFollowing);
 
     }
     return oAuth2User;

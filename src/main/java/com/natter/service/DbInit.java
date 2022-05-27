@@ -2,7 +2,9 @@ package com.natter.service;
 
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.user.User;
+import com.natter.model.user.UserFollowersFollowing;
 import com.natter.model.user.UserInfo;
+import com.natter.repository.user.UserFollowersFollowingRepository;
 import com.natter.repository.user.UserInfoRepository;
 import com.natter.repository.user.UserRepository;
 import com.natter.service.natter.NatterService;
@@ -24,6 +26,9 @@ public class DbInit {
 
   @Autowired
   UserInfoRepository userInfoRepository;
+
+  @Autowired
+  UserFollowersFollowingRepository userFollowersFollowingRepository;
 
   @PostConstruct
   private void postConstruct() {
@@ -78,6 +83,17 @@ public class DbInit {
         new UserInfo(user3.getId(), user3.getFirstName(), user3.getLastName(), user3.getEmail());
 
     userInfoRepository.saveAll(List.of(userInfo, userInfo2, userInfo3, userInfo4));
+
+    UserFollowersFollowing userFollowersFollowing =
+        new UserFollowersFollowing(user.getId(), user.getFirstName(), user.getLastName(), 0, 0);
+    UserFollowersFollowing userFollowersFollowing1 =
+        new UserFollowersFollowing(user1.getId(), user1.getFirstName(), user1.getLastName(), 0, 0);
+    UserFollowersFollowing userFollowersFollowing2 =
+        new UserFollowersFollowing(user2.getId(), user2.getFirstName(), user2.getLastName(), 0, 0);
+    UserFollowersFollowing userFollowersFollowing3 =
+        new UserFollowersFollowing(user3.getId(), user3.getFirstName(), user3.getLastName(), 0, 0);
+
+    userFollowersFollowingRepository.saveAll(List.of(userFollowersFollowing, userFollowersFollowing1, userFollowersFollowing2, userFollowersFollowing3));
 
   }
 }
