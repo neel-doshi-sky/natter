@@ -103,4 +103,16 @@ public class NatterController {
 
   }
 
+  @ResponseBody
+  @PostMapping(value = "/comment")
+  public ResponseEntity<CreateResponseDto<NatterById>> comment(
+      @AuthenticationPrincipal OAuth2User principal,
+      @RequestBody NatterCreateRequest natterCreateRequest) {
+
+    CreateResponseDto<NatterById> result =
+        natterService.addComment(natterCreateRequest, authService.getUserIdFromAuth(principal));
+    return new ResponseEntity<>(result, result.getStatus());
+
+  }
+
 }

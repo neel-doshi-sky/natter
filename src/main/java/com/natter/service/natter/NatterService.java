@@ -14,6 +14,7 @@ import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -165,17 +166,18 @@ public class NatterService {
     } else {
       Optional<NatterById> natterParentOptional = natterByIdRepository.findById(commentRequest.getParentNatterId());
       if(natterParentOptional.isPresent()){
-        NatterById parentNatter = natterParentOptional.get();
-        NatterById comment = natterDatabaseService.addComment(parentNatter.getId(), commentRequest);
-        parentNatter.getComments().add(comment.getId());
         try {
+        NatterById parentNatter = natterParentOptional.get();
+        NatterById comment = natterDatabaseService.addComment(commentRequest, authId);
+        parentNatter.getComments().add(comment.getId());
           natterDatabaseService.updateNatterAfterComment(parentNatter);
           responseDto.setStatus(HttpStatus.OK);
           responseDto.setUserMessages(Map.of(SuccessMessageNatterEnum.CREATED_COMMENT.getCode(), SuccessMessageNatterEnum.CREATED_COMMENT.getMessage()));
           responseDto.setCreated(comment);
 
         } catch (DatabaseErrorException e){
-
+          responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+          responseDto.setErrorMessages(Map.of(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD.getCode(), ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD.getMessage()));
         }
 
       } else {

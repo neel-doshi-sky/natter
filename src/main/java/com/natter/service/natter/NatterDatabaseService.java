@@ -1,5 +1,6 @@
 package com.natter.service.natter;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.natter.enums.natter.ErrorMessageNatterEnum;
 import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
@@ -77,6 +78,7 @@ public class NatterDatabaseService {
     natterByAuthor.setId(natterByAuthorPrimaryKey);
     natterByAuthor.setBody(natter.getBody());
     natterByAuthor.setDateUpdated(LocalDateTime.now());
+    natterByAuthor.setCommentCount(natter.getComments().size());
 
     NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
     if (natterByAuthorCreated.getId() == null) {
@@ -106,13 +108,16 @@ public class NatterDatabaseService {
    * @param updateRequest the update request
    * @param authorId the authorId
    */
-  public void update(@NonNull final NatterUpdateRequest updateRequest, @NonNull final String authorId) {
+  public void update(@NonNull final NatterUpdateRequest updateRequest,
+                     @NonNull final String authorId) {
 
     natterByIdRepository.updateNatter(updateRequest.getBody(), updateRequest.getId());
     natterByAuthorRepository.updateNatter(updateRequest.getBody(), updateRequest.getId(), authorId);
   }
 
-  public NatterById addComment(String parentId, NatterCreateRequest commentRequest) {
-    return null;
+  public NatterById addComment(NatterCreateRequest commentRequest,
+                               String authId) throws DatabaseErrorException {
+    return create(Uuids.timeBased().toString(), commentRequest, authId);
+
   }
 }

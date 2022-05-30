@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
 import org.springframework.data.cassandra.core.mapping.CassandraType;
 import org.springframework.data.cassandra.core.mapping.Column;
@@ -48,4 +49,9 @@ public class NatterById {
   @CassandraType(type = CassandraType.Name.TEXT)
   @Column
   private List<String> comments = new ArrayList<>();
+
+  @Transient
+  private int commentCount(){
+    return comments != null ? comments.size() : 0;
+  }
 }

@@ -22,4 +22,7 @@ public class NatterByAuthor {
 
   @Column(value = "date_updated")
   private LocalDateTime dateUpdated;
+
+  @Column(value = "comment_count")
+  private int commentCount = 0;
 }

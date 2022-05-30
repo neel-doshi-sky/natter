@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -254,7 +253,7 @@ class  NatterServiceTest {
   }
 
   @Test
-  public void whenCommentAdded_parentNatterIdIsNull_returnError(){
+  public void whenCommentAdded_parentNatterIdIsNull_returnError() throws DatabaseErrorException {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", null);
     CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, "123");
     assertAll(
@@ -266,7 +265,7 @@ class  NatterServiceTest {
   }
 
   @Test
-  public void whenCommentAdded_parentNatterIdIsInValid_returnError(){
+  public void whenCommentAdded_parentNatterIdIsInValid_returnError() throws DatabaseErrorException {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", "23");
     when(natterByIdRepository.findById(natterCreateRequest.getParentNatterId())).thenReturn(Optional.empty());
     CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, "123");
@@ -282,7 +281,7 @@ class  NatterServiceTest {
   public void whenCommentAdded_parentNatterIdIsValid_returnSuccess() throws DatabaseErrorException {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", "23");
     when(natterByIdRepository.findById(natterCreateRequest.getParentNatterId())).thenReturn(Optional.of(new NatterById("23")));
-    when(natterDatabaseService.addComment("23", natterCreateRequest)).thenReturn(new NatterById());
+    when(natterDatabaseService.addComment(natterCreateRequest, "123")).thenReturn(new NatterById());
     CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, "123");
     assertAll(
         () -> assertNotNull(responseDto),
