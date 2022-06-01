@@ -2,18 +2,89 @@
 <html lang="en" xmlns:th="http://www.thymelead.org">
 <head>
     <meta charset="UTF-8">
-    <title>NATTR</title>
+    <title>NATR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </head>
 <body>
-<h1>WELCOME TO NATRR</h1>
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="padding-bottom: 20px">
+    <div class="container-fluid">
+        <p class="navbar-brand">NATR</p>
 
-<h2>Natrrs today: </H2>
-<div class="container text-center" th:each="natter: ${natters}">
-    <p th:text="${natter.body}"></p>
+    </div>
+</nav>
+<div class="mt-4 p-5 bg-primary text-white rounded">
+    <h1>Whats the natter? </h1>
+    <div class="float-end">
+        <div th:fragment="search-panel">
+            <form action="search.html" th:attr="action=@{/search}">
+                <div class="input-group mb-6">
+                    <input type="text" name="query" class="form-control" placeholder="Search for some good natter or a user!"
+                           aria-label="Search query" aria-describedby="button-addon2">
+                    <button type="submit" class="btn btn-info" id="button-addon2">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
+<div class="container-flex">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+            data-bs-whatever="@mdo">Post!
+    </button>
 
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form th:attr="action=@{/}" th:object="${natterCreateRequest}" th:method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">New Nat</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label for="message-text" class="col-form-label">Message:</label>
+                            <textarea class="form-control" id="message-text" th:field="*{body}"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Nat</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="container text-center" th:each="natter: ${user}">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title" th:text="${user.firstName} + ' ' + ${user.lastName}">Card title</h5>
+                <!--                <p class="card-text" th:text="${user.firstName} + ${user.lastName}"></p>-->
+                <p class="card-text" th:text="${user.email}"></p>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><p class="card-text" th:text="${user.followers}"></p></li>
+                <li class="list-group-item"><p class="card-text" th:text="${user.following}"></p></li>
+            </ul>
+
+        </div>
+    </div>
+    <h2 class="text-center">Latest Nats... </H2>
+    <div class="container text-center" th:each="natter: ${natters}">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title" th:text="${natter.body}">Card title</h5>
+                <p class="card-text" th:text="${natter.authorName}"></p>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><p class="card-text" th:text="${natter.commentCount}"></p></li>
+                <li class="list-group-item"><p class="card-text" th:text="${natter.dateCreated}"></p></li>
+            </ul>
+        </div>
+    </div>
+
+</div>
 </body>
 </html>

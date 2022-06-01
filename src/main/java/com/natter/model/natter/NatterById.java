@@ -47,11 +47,11 @@ public class NatterById {
   private String authorId;
 
   @CassandraType(type = CassandraType.Name.TEXT)
+  @Column(value = "author_name")
+  private String authorName;
+
+  @CassandraType(type = CassandraType.Name.TEXT)
   @Column
   private List<String> comments = new ArrayList<>();
 
-  @Transient
-  private int commentCount(){
-    return comments != null ? comments.size() : 0;
-  }
 }

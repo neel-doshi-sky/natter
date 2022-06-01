@@ -70,7 +70,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           new UserInfo(googleUserInfo.getId(), givenName, familyName,
               googleUserInfo.getEmail());
 
-      UserFollowersFollowing userFollowersFollowing = new UserFollowersFollowing(googleUserInfo.getId(), givenName, familyName, 0, 0);
+      UserFollowersFollowing userFollowersFollowing = new UserFollowersFollowing(googleUserInfo.getId(), givenName, familyName, 0, 0, googleUserInfo.getEmail());
       userRepository.save(user);
       userInfoRepository.save(userInfo);
       userFollowersFollowingRepository.save(userFollowersFollowing);

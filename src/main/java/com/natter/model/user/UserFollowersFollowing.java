@@ -31,4 +31,7 @@ public class UserFollowersFollowing {
   @Column
   private int following;
 
+  @Column
+  private String email;
+
 }

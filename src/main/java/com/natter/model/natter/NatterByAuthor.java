@@ -25,4 +25,10 @@ public class NatterByAuthor {
 
   @Column(value = "comment_count")
   private int commentCount = 0;
+
+  @Column(value = "author_name")
+  private String authorName;
+
+  @Column(value = "parent_author_id")
+  private String parentAuthorId;
 }

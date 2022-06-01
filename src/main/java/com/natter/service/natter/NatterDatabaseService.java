@@ -13,6 +13,7 @@ import com.natter.repository.natter.NatterByIdRepository;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,24 +29,29 @@ public class NatterDatabaseService {
    *
    * @param id                  the id of the natter
    * @param natterCreateRequest the natter create body
-   * @param authorId            the id of the author
+   * @param author            the id of the author
    * @return the created Natter
    * @throws DatabaseErrorException the database exception
    */
   @Transactional
   public NatterById create(@NonNull final String id,
                            @NonNull final NatterCreateRequest natterCreateRequest,
-                           @NonNull final String authorId) throws DatabaseErrorException {
+                           @NonNull final OAuth2User author) throws DatabaseErrorException {
+
+    String authorid = author.getAttribute("sub");
+    LocalDateTime now = LocalDateTime.now();
 
     NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
     natterByAuthorPrimaryKey.setId(id);
-    natterByAuthorPrimaryKey.setAuthorId(authorId);
+    natterByAuthorPrimaryKey.setAuthorId(authorid);
 
     NatterByAuthor natterByAuthor = new NatterByAuthor();
     natterByAuthor.setId(natterByAuthorPrimaryKey);
     natterByAuthor.setBody(natterCreateRequest.getBody());
-    natterByAuthor.setDateCreated(LocalDateTime.now());
+    natterByAuthor.setDateCreated(now);
     natterByAuthor.setDateUpdated(natterByAuthor.getDateCreated());
+    natterByAuthor.setAuthorName(author.getAttribute("name"));
+    natterByAuthor.setParentAuthorId(natterCreateRequest.getParentNatterId());
 
     NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
     if (natterByAuthorCreated.getId() == null) {
@@ -55,11 +61,11 @@ public class NatterDatabaseService {
     NatterById natterById = new NatterById();
     natterById.setId(id);
     natterById.setBody(natterCreateRequest.getBody());
-    LocalDateTime now = LocalDateTime.now();
     natterById.setDateCreated(now);
     natterById.setDateUpdated(natterById.getDateCreated());
-    natterById.setAuthorId(authorId);
-    natterById.setParentNatterId(null);
+    natterById.setAuthorId(authorid);
+    natterById.setAuthorName(author.getAttribute("name"));
+    natterById.setParentNatterId(natterCreateRequest.getParentNatterId());
     NatterById createdNatter = natterByIdRepository.save(natterById);
     if (createdNatter.getId() == null) {
       throw new DatabaseErrorException(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD);
@@ -77,8 +83,11 @@ public class NatterDatabaseService {
     NatterByAuthor natterByAuthor = new NatterByAuthor();
     natterByAuthor.setId(natterByAuthorPrimaryKey);
     natterByAuthor.setBody(natter.getBody());
-    natterByAuthor.setDateUpdated(LocalDateTime.now());
+    natterByAuthor.setDateUpdated(natter.getDateUpdated());
+    natterByAuthor.setDateCreated(natter.getDateCreated());
     natterByAuthor.setCommentCount(natter.getComments().size());
+    natterByAuthor.setAuthorName(natter.getAuthorName());
+    natterByAuthor.setParentAuthorId(natter.getParentNatterId());
 
     NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
     if (natterByAuthorCreated.getId() == null) {
@@ -116,7 +125,7 @@ public class NatterDatabaseService {
   }
 
   public NatterById addComment(NatterCreateRequest commentRequest,
-                               String authId) throws DatabaseErrorException {
+                               OAuth2User authId) throws DatabaseErrorException {
     return create(Uuids.timeBased().toString(), commentRequest, authId);
 
   }

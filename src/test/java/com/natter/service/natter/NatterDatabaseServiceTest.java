@@ -17,11 +17,15 @@ import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @ExtendWith(MockitoExtension.class)
 class NatterDatabaseServiceTest {
@@ -34,6 +38,9 @@ class NatterDatabaseServiceTest {
 
   @Mock
   NatterByIdRepository natterByIdRepository;
+
+  OAuth2User
+      oAuth2User = new DefaultOAuth2User(new ArrayList<>(), Map.of("sub","115826771724477311086", "name", "Neel Doshi"), "name");
 
   @Test
   public void returnCreatedNatter_WhenSuccessfulSaveToDatabase() throws DatabaseErrorException {
@@ -56,7 +63,7 @@ class NatterDatabaseServiceTest {
 
     when(natterByAuthorRepository.save(any())).thenReturn(natterByAuthor);
     when(natterByIdRepository.save(any())).thenReturn(createdNatterById);
-    NatterById result = natterDatabaseService.create("123", new NatterCreateRequest(), "123");
+    NatterById result = natterDatabaseService.create("123", new NatterCreateRequest(), oAuth2User);
     assertAll(
         () -> assertNotNull(result),
         () -> assertEquals(createdNatterById.getId(), result.getId())
@@ -70,14 +77,14 @@ class NatterDatabaseServiceTest {
   public void throwException_whenSaveToAuthorTableReturnsNoId(){
     NatterByAuthor nullId = new NatterByAuthor();
     when(natterByAuthorRepository.save(any())).thenReturn(nullId);
-    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), "123"));
+    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), oAuth2User));
   }
 
   @Test
   public void throwException_whenSaveToIdTableReturnsNoId(){
     NatterByAuthor nullId = new NatterByAuthor();
     when(natterByAuthorRepository.save(any())).thenReturn(nullId);
-    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), "123"));
+    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), oAuth2User));
   }
 
 }

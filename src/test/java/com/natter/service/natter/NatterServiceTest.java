@@ -24,6 +24,7 @@ import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @ExtendWith(MockitoExtension.class)
 class  NatterServiceTest {
@@ -49,17 +52,18 @@ class  NatterServiceTest {
   @Mock
   NatterByIdRepository natterByIdRepository;
 
-
   @Mock
   NatterValidationService natterValidationService;
 
   NatterServiceTestHelper natterServiceTestHelper = new NatterServiceTestHelper();
 
+  OAuth2User oAuth2User = new DefaultOAuth2User(new ArrayList<>(), Map.of("sub","115826771724477311086", "name", "Neel Doshi"), "name");
+
 
   @Test
   public void whenNatterIsNull_ReturnNoNatterToCreateMessageToUser() {
     NatterCreateRequest natter = null;
-    CreateResponseDto<NatterById> response = natterService.create(natter, "123");
+    CreateResponseDto<NatterById> response = natterService.create(natter, oAuth2User);
     assertAll(
         () -> assertNotNull(response),
         () -> assertEquals(1, response.getErrorMessages().size()),
@@ -87,7 +91,7 @@ class  NatterServiceTest {
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(new HashMap<>());
     when(natterDatabaseService.create(any(), any(), any())).thenReturn(createdNatterById);
 
-    CreateResponseDto<NatterById> response = natterService.create(natterRequest, "123");
+    CreateResponseDto<NatterById> response = natterService.create(natterRequest, oAuth2User);
 
     assertAll(
         () -> assertNotNull(response),
@@ -117,7 +121,7 @@ class  NatterServiceTest {
 
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(errors);
     CreateResponseDto<NatterById>
-        natterCreateResponseDto = natterService.create(natterRequest, "123");
+        natterCreateResponseDto = natterService.create(natterRequest, oAuth2User);
     assertAll(
         () -> assertNotNull(natterCreateResponseDto),
         () -> assertEquals(2, natterCreateResponseDto.getErrorMessages().size())
@@ -127,7 +131,7 @@ class  NatterServiceTest {
 
   @Test
   public void whenNullBodyPassedToCreate_returnNullBodyError(){
-    CreateResponseDto<NatterById> natterCreateResponseDto = natterService.create(null, "123");
+    CreateResponseDto<NatterById> natterCreateResponseDto = natterService.create(null, oAuth2User);
     assertAll(
         () -> assertNotNull(natterCreateResponseDto),
         () -> assertNotNull(natterCreateResponseDto.getErrorMessages()),
@@ -255,7 +259,7 @@ class  NatterServiceTest {
   @Test
   public void whenCommentAdded_parentNatterIdIsNull_returnError() throws DatabaseErrorException {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", null);
-    CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, "123");
+    CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, oAuth2User);
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
@@ -268,7 +272,7 @@ class  NatterServiceTest {
   public void whenCommentAdded_parentNatterIdIsInValid_returnError() throws DatabaseErrorException {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", "23");
     when(natterByIdRepository.findById(natterCreateRequest.getParentNatterId())).thenReturn(Optional.empty());
-    CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, "123");
+    CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, oAuth2User);
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
@@ -281,8 +285,8 @@ class  NatterServiceTest {
   public void whenCommentAdded_parentNatterIdIsValid_returnSuccess() throws DatabaseErrorException {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", "23");
     when(natterByIdRepository.findById(natterCreateRequest.getParentNatterId())).thenReturn(Optional.of(new NatterById("23")));
-    when(natterDatabaseService.addComment(natterCreateRequest, "123")).thenReturn(new NatterById());
-    CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, "123");
+    when(natterDatabaseService.addComment(natterCreateRequest, oAuth2User)).thenReturn(new NatterById());
+    CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, oAuth2User);
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(1, responseDto.getUserMessages().size()),

@@ -99,11 +99,11 @@ class UserServiceTest {
 
   @Test
   public void whenGetFollowers_validIdPassed_returnFollowers_ToUser(){
-    List<UserFollowersFollowing> list = List.of(new UserFollowersFollowing("123", "Test", "1", 0, 0),
-        new UserFollowersFollowing("1234", "Test", "3", 2, 6),
-        new UserFollowersFollowing("1235", "Test", "5", 23, 54),
-        new UserFollowersFollowing("1236", "Test", "6", 46, 654),
-        new UserFollowersFollowing("1237", "Test", "7", 244, 4));
+    List<UserFollowersFollowing> list = List.of(new UserFollowersFollowing("123", "Test", "1", 0, 0, "test@test.com"),
+        new UserFollowersFollowing("1234", "Test", "3", 2, 6, "test@test.com"),
+        new UserFollowersFollowing("1235", "Test", "5", 23, 54, "test@test.com"),
+        new UserFollowersFollowing("1236", "Test", "6", 46, 654, "test@test.com"),
+        new UserFollowersFollowing("1237", "Test", "7", 244, 4, "test@test.com"));
     when(userRepository.findById(anyString())).thenReturn(Optional.of(new User("123", "Test", "1", "test", Set.of("1", "2", "3", "4", "5"), new HashSet<>(), LocalDateTime.now())));
     when(userFollowersFollowingRepository.findAllById(anySet())).thenReturn(list);
     ResponseListDto<UserFollowersFollowing> responseListDto = userService.getFollowersForUserId("123");
@@ -127,11 +127,11 @@ class UserServiceTest {
 
   @Test
   public void whenGetFollowing_validIdPassed_returnFollowing_ToUser(){
-    List<UserFollowersFollowing> list = List.of(new UserFollowersFollowing("123", "Test", "1", 0, 0),
-        new UserFollowersFollowing("1234", "Test", "3", 2, 6),
-        new UserFollowersFollowing("1235", "Test", "5", 23, 54),
-        new UserFollowersFollowing("1236", "Test", "6", 46, 654),
-        new UserFollowersFollowing("1237", "Test", "7", 244, 4));
+    List<UserFollowersFollowing> list = List.of(new UserFollowersFollowing("123", "Test", "1", 0, 0, "test@test.com"),
+        new UserFollowersFollowing("1234", "Test", "3", 2, 6, "test@test.com"),
+        new UserFollowersFollowing("1235", "Test", "5", 23, 54, "test@test.com"),
+        new UserFollowersFollowing("1236", "Test", "6", 46, 654, "test@test.com"),
+        new UserFollowersFollowing("1237", "Test", "7", 244, 4, "test@test.com"));
     when(userRepository.findById(anyString())).thenReturn(Optional.of(new User("123", "Test", "1", "test", new HashSet<>(), Set.of("1", "2", "3", "4", "5"), LocalDateTime.now())));
     when(userFollowersFollowingRepository.findAllById(anySet())).thenReturn(list);
     ResponseListDto<UserFollowersFollowing> responseListDto = userService.getFollowingForUserId("123");

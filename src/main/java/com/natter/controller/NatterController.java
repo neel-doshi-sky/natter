@@ -67,7 +67,7 @@ public class NatterController {
       @RequestBody NatterCreateRequest natterCreateRequest) {
 
     CreateResponseDto<NatterById> result =
-        natterService.create(natterCreateRequest, authService.getUserIdFromAuth(principal));
+        natterService.create(natterCreateRequest, principal);
     return new ResponseEntity<>(result, result.getStatus());
 
   }
@@ -110,7 +110,7 @@ public class NatterController {
       @RequestBody NatterCreateRequest natterCreateRequest) {
 
     CreateResponseDto<NatterById> result =
-        natterService.addComment(natterCreateRequest, authService.getUserIdFromAuth(principal));
+        natterService.addComment(natterCreateRequest, principal);
     return new ResponseEntity<>(result, result.getStatus());
 
   }

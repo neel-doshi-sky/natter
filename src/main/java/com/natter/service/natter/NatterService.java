@@ -24,6 +24,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,10 +41,10 @@ public class NatterService {
    * Method to create a natter item and save it to the database
    *
    * @param natterCreateRequest the create natterCreateRequest body
-   * @param authorId            the author id
+   * @param author            the author id
    * @return the result of the operation with any errors
    */
-  public CreateResponseDto<NatterById> create(NatterCreateRequest natterCreateRequest, String authorId) {
+  public CreateResponseDto<NatterById> create(NatterCreateRequest natterCreateRequest, OAuth2User author) {
     CreateResponseDto<NatterById> response = new CreateResponseDto<>();
     if (natterCreateRequest == null) {
       response.setStatus(HttpStatus.BAD_REQUEST);
@@ -57,7 +58,7 @@ public class NatterService {
 
         try {
           NatterById created =
-              natterDatabaseService.create(timeId.toString(), natterCreateRequest, authorId);
+              natterDatabaseService.create(timeId.toString(), natterCreateRequest, author);
           response.setCreated(created);
           response.setStatus(HttpStatus.OK);
           response.setUserMessages(Map.of(SuccessMessageNatterEnum.CREATED_NEW_NATTER.getCode(), SuccessMessageNatterEnum.CREATED_NEW_NATTER.getMessage()));
@@ -158,7 +159,7 @@ public class NatterService {
     return responseDto;
   }
 
-  public CreateResponseDto<NatterById> addComment(NatterCreateRequest commentRequest, String authId) {
+  public CreateResponseDto<NatterById> addComment(NatterCreateRequest commentRequest, OAuth2User author) {
     CreateResponseDto<NatterById> responseDto = new CreateResponseDto<>();
     if(commentRequest.getParentNatterId() == null){
       responseDto.setErrorMessages(Map.of(ErrorMessageNatterEnum.NATTER_NULL_ID.getCode(), ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage()));
@@ -168,7 +169,7 @@ public class NatterService {
       if(natterParentOptional.isPresent()){
         try {
         NatterById parentNatter = natterParentOptional.get();
-        NatterById comment = natterDatabaseService.addComment(commentRequest, authId);
+        NatterById comment = natterDatabaseService.addComment(commentRequest, author);
         parentNatter.getComments().add(comment.getId());
           natterDatabaseService.updateNatterAfterComment(parentNatter);
           responseDto.setStatus(HttpStatus.OK);
