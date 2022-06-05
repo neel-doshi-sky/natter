@@ -9,6 +9,7 @@ import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.service.AuthService;
 import com.natter.service.natter.NatterService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -115,4 +116,10 @@ public class NatterController {
 
   }
 
+  @GetMapping(value = "/{id}")
+  public ResponseEntity<ResponseDto> getById(@AuthenticationPrincipal OAuth2User principal,
+                                            @PathVariable String id) {
+    ResponseDto result = natterService.getNatterById(id);
+    return new ResponseEntity<>(result, result.getStatus());
+  }
 }

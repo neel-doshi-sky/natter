@@ -2,6 +2,8 @@ package com.natter.service.natter;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.natter.dto.CreateResponseDto;
+import com.natter.dto.GetResponseDto;
+import com.natter.dto.NatterDto;
 import com.natter.dto.ResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.enums.natter.ErrorMessageNatterEnum;
@@ -14,15 +16,16 @@ import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
-import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -178,14 +181,55 @@ public class NatterService {
 
         } catch (DatabaseErrorException e){
           responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-          responseDto.setErrorMessages(Map.of(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD.getCode(), ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD.getMessage()));
+          responseDto.setErrorMessages(
+              Map.of(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD.getCode(),
+                  ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD.getMessage()));
         }
 
       } else {
-        responseDto.setErrorMessages(Map.of(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode(), ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
+        responseDto.setErrorMessages(
+            Map.of(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode(),
+                ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
         responseDto.setStatus(HttpStatus.BAD_REQUEST);
       }
     }
     return responseDto;
+  }
+
+  public GetResponseDto<NatterDto> getNatterById(String id) {
+    GetResponseDto<NatterDto> response = new GetResponseDto<>();
+    if(id == null) {
+      try {
+        NatterById natterById = natterByIdRepository.findById(id).orElseThrow();
+        List<String> commentIds = natterById.getComments();
+        List<NatterById> comments = natterByIdRepository.findAllById(commentIds);
+        List<NatterDto> commentsDto = new ArrayList<>();
+        comments.forEach(comment -> {
+          NatterDto natterDto =
+              new NatterDto(comment.getId(), comment.getBody(), comment.getParentNatterId(),
+                  comment.getDateCreated(), comment.getDateUpdated(), comment.getAuthorId(),
+                  comment.getAuthorName());
+          commentsDto.add(natterDto);
+        });
+        response.setObject(
+            new NatterDto(natterById.getId(), natterById.getBody(), natterById.getParentNatterId(),
+                natterById.getDateCreated(), natterById.getDateUpdated(), natterById.getAuthorId(),
+                natterById.getAuthorName(), commentsDto));
+        response.setStatus(HttpStatus.OK);
+        response.setUserMessages(Map.of(SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getCode(),
+            SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getMessage()));
+
+      } catch (NoSuchElementException | InvalidDataAccessApiUsageException e) {
+        response.setErrorMessages(
+            Map.of(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode(),
+                ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage()));
+        response.setStatus(HttpStatus.BAD_REQUEST);
+      }
+    } else {
+      response.setErrorMessages(Map.of(ErrorMessageNatterEnum.NATTER_NULL_ID.getCode(), ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage()));
+      response.setStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    return response;
   }
 }
