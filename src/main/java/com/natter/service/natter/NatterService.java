@@ -17,11 +17,13 @@ import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -123,6 +125,8 @@ public class NatterService {
     ResponseListDto<NatterByAuthor> natterListResponseDto = new ResponseListDto<>();
     List<NatterByAuthor> natterByAuthor =
         natterByAuthorRepository.findAllByAuthorId(authorId);
+    natterByAuthor = natterByAuthor.stream().filter(natter ->
+       natter.getParentAuthorId() == null).sorted(Comparator.comparing(NatterByAuthor::getDateUpdated).reversed()).collect(Collectors.toList());
     natterListResponseDto.setList(natterByAuthor);
     natterListResponseDto.setStatus(HttpStatus.OK);
     natterListResponseDto.setUserMessages(
@@ -198,20 +202,23 @@ public class NatterService {
 
   public GetResponseDto<NatterDto> getNatterById(String id) {
     GetResponseDto<NatterDto> response = new GetResponseDto<>();
-    if(id == null) {
+    if(id != null) {
       try {
         NatterById natterById = natterByIdRepository.findById(id).orElseThrow();
         List<String> commentIds = natterById.getComments();
         List<NatterById> comments = natterByIdRepository.findAllById(commentIds);
         List<NatterDto> commentsDto = new ArrayList<>();
+        List<NatterDto> finalCommentsDto = commentsDto;
         comments.forEach(comment -> {
           NatterDto natterDto =
               new NatterDto(comment.getId(), comment.getBody(), comment.getParentNatterId(),
                   comment.getDateCreated(), comment.getDateUpdated(), comment.getAuthorId(),
                   comment.getAuthorName());
-          commentsDto.add(natterDto);
+          finalCommentsDto.add(natterDto);
         });
-        response.setObject(
+        commentsDto = finalCommentsDto.stream().sorted(Comparator.comparing(NatterDto::getDateUpdated).reversed()).collect(
+            Collectors.toList());
+        response.setResponseObject(
             new NatterDto(natterById.getId(), natterById.getBody(), natterById.getParentNatterId(),
                 natterById.getDateCreated(), natterById.getDateUpdated(), natterById.getAuthorId(),
                 natterById.getAuthorName(), commentsDto));

@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GetResponseDto<T> extends ResponseDto{
 
-  private T object;
+  private T responseObject;
 }
