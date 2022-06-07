@@ -9,7 +9,6 @@ import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.service.AuthService;
 import com.natter.service.natter.NatterService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -50,6 +49,22 @@ public class NatterController {
 
     ResponseListDto<NatterByAuthor> natterListResponse =
         natterService.getNattersForUser(authService.getUserIdFromAuth(principal));
+    return new ResponseEntity<>(natterListResponse, HttpStatus.OK);
+
+  }
+
+  /**
+   * Endpoint to get all tweets for the authenticated user
+   *
+   * @param principal the authenticated user
+   * @return the response entity containing the list of natters
+   */
+  @GetMapping(value = "/")
+  public ResponseEntity<ResponseListDto<NatterByAuthor>> listAllNatters(
+      @AuthenticationPrincipal OAuth2User principal) {
+
+    ResponseListDto<NatterByAuthor> natterListResponse =
+        natterService.getAllNatters(authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(natterListResponse, HttpStatus.OK);
 
   }
@@ -104,6 +119,13 @@ public class NatterController {
 
   }
 
+  /**
+   * Endpoint to add a comment to an existing natter
+   *
+   * @param principal           the authenticated user
+   * @param natterCreateRequest the natter create request body
+   * @return the response entity containing result of operation
+   */
   @ResponseBody
   @PostMapping(value = "/comment")
   public ResponseEntity<CreateResponseDto<NatterById>> comment(
@@ -116,10 +138,17 @@ public class NatterController {
 
   }
 
+  /**
+   * Endpoint to get a natter by id
+   *
+   * @param principal the authenticated user
+   * @param id        the id of the natter to fetch
+   * @return the response entity containing the result of the operation
+   */
   @GetMapping(value = "/{id}")
   public ResponseEntity<ResponseDto> getById(@AuthenticationPrincipal OAuth2User principal,
-                                            @PathVariable String id) {
-    ResponseDto result = natterService.getNatterById(id);
+                                             @PathVariable String id) {
+    ResponseDto result = natterService.getNatterById(id, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
   }
 }

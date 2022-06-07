@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -99,7 +100,7 @@ public class NatterService {
       Optional<NatterById> foundById = natterByIdRepository.findById(idToDelete);
       if(foundById.isPresent()) {
        if(foundById.get().getAuthorId().equals(authorId)) {
-         natterDatabaseService.delete(idToDelete, authorId);
+         natterDatabaseService.delete(foundById.get());
          response.setStatus(HttpStatus.OK);
          response.setUserMessages(Map.of(SuccessMessageNatterEnum.DELETED_NATTER.getCode(), SuccessMessageNatterEnum.DELETED_NATTER.getMessage()));
        } else {
@@ -127,6 +128,21 @@ public class NatterService {
         natterByAuthorRepository.findAllByAuthorId(authorId);
     natterByAuthor = natterByAuthor.stream().filter(natter ->
        natter.getParentAuthorId() == null).sorted(Comparator.comparing(NatterByAuthor::getDateUpdated).reversed()).collect(Collectors.toList());
+    natterListResponseDto.setList(natterByAuthor);
+    natterListResponseDto.setStatus(HttpStatus.OK);
+    natterListResponseDto.setUserMessages(
+        Map.of(SuccessMessageNatterEnum.FETCHED_NATTERS_BY_AUTHOR.getCode(),
+            SuccessMessageNatterEnum.FETCHED_NATTERS_BY_AUTHOR.getMessage()));
+    return natterListResponseDto;
+  }
+
+
+  public ResponseListDto<NatterByAuthor> getAllNatters(String authorId) {
+    ResponseListDto<NatterByAuthor> natterListResponseDto = new ResponseListDto<>();
+    List<NatterByAuthor> natterByAuthor =
+        natterByAuthorRepository.findAll();
+    natterByAuthor = natterByAuthor.stream().filter(natter ->
+        natter.getParentAuthorId() == null).sorted(Comparator.comparing(NatterByAuthor::getDateUpdated).reversed()).collect(Collectors.toList());
     natterListResponseDto.setList(natterByAuthor);
     natterListResponseDto.setStatus(HttpStatus.OK);
     natterListResponseDto.setUserMessages(
@@ -200,7 +216,7 @@ public class NatterService {
     return responseDto;
   }
 
-  public GetResponseDto<NatterDto> getNatterById(String id) {
+  public GetResponseDto<NatterDto> getNatterById(String id, String authId) {
     GetResponseDto<NatterDto> response = new GetResponseDto<>();
     if(id != null) {
       try {
@@ -213,7 +229,7 @@ public class NatterService {
           NatterDto natterDto =
               new NatterDto(comment.getId(), comment.getBody(), comment.getParentNatterId(),
                   comment.getDateCreated(), comment.getDateUpdated(), comment.getAuthorId(),
-                  comment.getAuthorName());
+                  comment.getAuthorName(), Objects.equals(authId, comment.getAuthorId()));
           finalCommentsDto.add(natterDto);
         });
         commentsDto = finalCommentsDto.stream().sorted(Comparator.comparing(NatterDto::getDateUpdated).reversed()).collect(
@@ -221,7 +237,8 @@ public class NatterService {
         response.setResponseObject(
             new NatterDto(natterById.getId(), natterById.getBody(), natterById.getParentNatterId(),
                 natterById.getDateCreated(), natterById.getDateUpdated(), natterById.getAuthorId(),
-                natterById.getAuthorName(), commentsDto));
+                natterById.getAuthorName(), commentsDto,
+                Objects.equals(authId, natterById.getAuthorId())));
         response.setStatus(HttpStatus.OK);
         response.setUserMessages(Map.of(SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getCode(),
             SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getMessage()));

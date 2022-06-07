@@ -10,7 +10,7 @@ import lombok.Data;
 public class NatterDto {
 
   public NatterDto(String id, String body, String parentNatterId, LocalDateTime dateCreated,
-                   LocalDateTime dateUpdated, String authorId, String authorName) {
+                   LocalDateTime dateUpdated, String authorId, String authorName, boolean isOwnedByAuth) {
     this.id = id;
     this.body = body;
     this.parentNatterId = parentNatterId;
@@ -18,6 +18,7 @@ public class NatterDto {
     this.dateUpdated = dateUpdated;
     this.authorId = authorId;
     this.authorName = authorName;
+    this.isOwnedByAuth = isOwnedByAuth;
   }
 
   private String id;
@@ -42,4 +43,6 @@ public class NatterDto {
 
 
   private List<NatterDto> comments;
+
+  private boolean isOwnedByAuth;
 }

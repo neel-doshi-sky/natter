@@ -157,7 +157,7 @@ class  NatterServiceTest {
             SuccessMessageNatterEnum.DELETED_NATTER.getMessage(), responseDto.getUserMessages().get(
                 SuccessMessageNatterEnum.DELETED_NATTER.getCode()))
     );
-    verify(natterDatabaseService, times(1)).delete("123", "123");
+    verify(natterDatabaseService, times(1)).delete(natter);
 
   }
 

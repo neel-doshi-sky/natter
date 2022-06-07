@@ -11,6 +11,9 @@ import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -38,12 +41,12 @@ public class NatterDatabaseService {
                            @NonNull final NatterCreateRequest natterCreateRequest,
                            @NonNull final OAuth2User author) throws DatabaseErrorException {
 
-    String authorid = author.getAttribute("sub");
+    String authorId = author.getAttribute("sub");
     LocalDateTime now = LocalDateTime.now();
 
     NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
     natterByAuthorPrimaryKey.setId(id);
-    natterByAuthorPrimaryKey.setAuthorId(authorid);
+    natterByAuthorPrimaryKey.setAuthorId(authorId);
 
     NatterByAuthor natterByAuthor = new NatterByAuthor();
     natterByAuthor.setId(natterByAuthorPrimaryKey);
@@ -63,7 +66,7 @@ public class NatterDatabaseService {
     natterById.setBody(natterCreateRequest.getBody());
     natterById.setDateCreated(now);
     natterById.setDateUpdated(natterById.getDateCreated());
-    natterById.setAuthorId(authorid);
+    natterById.setAuthorId(authorId);
     natterById.setAuthorName(author.getAttribute("name"));
     natterById.setParentNatterId(natterCreateRequest.getParentNatterId());
     NatterById createdNatter = natterByIdRepository.save(natterById);
@@ -100,14 +103,23 @@ public class NatterDatabaseService {
   /**
    * Method to delete natters from all required tables
    *
-   * @param idToDelete the id to delete
-   * @param authorId   the id of the user
+   * @param natterById the id to delete
    */
-  public void delete(@NonNull final String idToDelete, @NonNull final String authorId) {
-    natterByIdRepository.deleteById(idToDelete);
-    NatterByAuthorPrimaryKey key = new NatterByAuthorPrimaryKey();
-    key.setId(idToDelete);
-    key.setAuthorId(authorId);
+  public void delete(@NonNull final NatterById natterById) {
+    NatterByAuthorPrimaryKey key = new NatterByAuthorPrimaryKey(natterById.getAuthorId(), natterById.getId());
+    if(natterById.getParentNatterId() != null){
+     updateCommentCountForDeletion(natterById);
+    }
+    natterByIdRepository.deleteById(natterById.getId());
+    if(!natterById.getComments().isEmpty()) {
+      List<NatterById> commentsList = natterByIdRepository.findAllById(natterById.getComments());
+      natterByIdRepository.deleteAllById(natterById.getComments());
+      List<NatterByAuthorPrimaryKey> commentsToDelete = new ArrayList<>();
+      for(NatterById comment : commentsList){
+        commentsToDelete.add(new NatterByAuthorPrimaryKey(comment.getAuthorId(), comment.getId()));
+      }
+      natterByAuthorRepository.deleteAllById(commentsToDelete);
+    }
     natterByAuthorRepository.deleteById(key);
   }
 
@@ -128,5 +140,15 @@ public class NatterDatabaseService {
                                OAuth2User authId) throws DatabaseErrorException {
     return create(Uuids.timeBased().toString(), commentRequest, authId);
 
+  }
+
+  private void updateCommentCountForDeletion(NatterById natterById) throws NoSuchElementException {
+    NatterById parent = natterByIdRepository.findById(natterById.getParentNatterId()).orElseThrow();
+    parent.getComments().remove(natterById.getId());
+    natterByIdRepository.save(parent);
+    NatterByAuthor parentByAuthor = natterByAuthorRepository.findById(new NatterByAuthorPrimaryKey(parent.getAuthorId(),
+        parent.getId())).orElseThrow();
+    parentByAuthor.setCommentCount(parentByAuthor.getCommentCount() - 1);
+    natterByAuthorRepository.save(parentByAuthor);
   }
 }
