@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -85,6 +86,38 @@ class NatterDatabaseServiceTest {
     NatterByAuthor nullId = new NatterByAuthor();
     when(natterByAuthorRepository.save(any())).thenReturn(nullId);
     assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), oAuth2User));
+  }
+
+  @Test
+  public void throwException_whenUpdateNatterAfterComment_ReturnsNoIdOnSave(){
+    NatterById createdNatterById = new NatterById();
+    createdNatterById.setParentNatterId(null);
+    createdNatterById.setAuthorId("testUserId");
+    createdNatterById.setBody("This is a natter!");
+    createdNatterById.setId("12323");
+    createdNatterById.setDateCreated(LocalDateTime.now());
+    createdNatterById.setDateUpdated(createdNatterById.getDateCreated());
+    when(natterByAuthorRepository.save(any())).thenReturn(new NatterByAuthor());
+    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.updateNatterAfterComment(createdNatterById));
+  }
+
+  @Test
+  public void updateNatterTables_whenValidNatterPassed_onUpdateAfterComment()
+      throws DatabaseErrorException {
+    NatterById createdNatterById = new NatterById();
+    createdNatterById.setParentNatterId(null);
+    createdNatterById.setAuthorId("testUserId");
+    createdNatterById.setBody("This is a natter!");
+    createdNatterById.setId("12323");
+    createdNatterById.setDateCreated(LocalDateTime.now());
+    createdNatterById.setDateUpdated(createdNatterById.getDateCreated());
+    NatterByAuthor natterByAuthor = new NatterByAuthor();
+    natterByAuthor.setId(new NatterByAuthorPrimaryKey());
+    when(natterByAuthorRepository.save(any())).thenReturn(natterByAuthor);
+    when(natterByIdRepository.save(any())).thenReturn(createdNatterById);
+    natterDatabaseService.updateNatterAfterComment(createdNatterById);
+    verify(natterByAuthorRepository).save(any());
+    verify(natterByIdRepository).save(any());
   }
 
 }

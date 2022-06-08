@@ -12,7 +12,9 @@ public enum SuccessMessageNatterEnum {
   FETCHED_NATTERS_BY_AUTHOR("10002", "Successfully fetched natters by author"),
   FETCHED_NATTER_BY_ID("10005", "Successfully fetched natter by id"),
   UPDATED_NATTER("10003", "Successfully updated natter"),
-  CREATED_COMMENT("10004", "Successfully added comment");
+  CREATED_COMMENT("10004", "Successfully added comment"),
+
+  FETCHED_All_NATTERS("10006", "Successfully fetched all natters");
 
   private final String code;
   private final String message;

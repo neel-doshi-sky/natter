@@ -33,45 +33,86 @@ public class UserController {
   private final AuthService authService;
   private final UserRepository userRepository;
 
+  /**
+   * Endpoint to follow a user by id
+   *
+   * @param principal the authenticated user
+   * @param id        the id of the user to follow
+   * @return the response entity result
+   */
   @PostMapping(value = "/follow/{id}")
   public ResponseEntity<ResponseDto> followUserById(@AuthenticationPrincipal OAuth2User principal,
                                                     @PathVariable(value = "id") String id) {
-    ResponseDto response = userService.followOrUnfollowUserById(authService.getUserIdFromAuth(principal), id, true);
+    ResponseDto response =
+        userService.followOrUnfollowUserById(authService.getUserIdFromAuth(principal), id, true);
     return new ResponseEntity<>(response, response.getStatus());
   }
 
+  /**
+   * Endpoint to unfollow a user by id
+   *
+   * @param principal the authenticated user
+   * @param id        the id of the user to unfollow
+   * @return the response entity result
+   */
   @PostMapping(value = "/unfollow/{id}")
   public ResponseEntity<ResponseDto> unfollowUserById(@AuthenticationPrincipal OAuth2User principal,
-                                                    @PathVariable(value = "id") String id) {
-    ResponseDto response = userService.followOrUnfollowUserById(authService.getUserIdFromAuth(principal), id, false);
+                                                      @PathVariable(value = "id") String id) {
+    ResponseDto response =
+        userService.followOrUnfollowUserById(authService.getUserIdFromAuth(principal), id, false);
     return new ResponseEntity<>(response, response.getStatus());
   }
 
+  /**
+   * Endpoint to get a list of followers for a user id
+   *
+   * @param principal the authenticated user
+   * @param id        the id of the user
+   * @return the response entity result
+   */
   @GetMapping(value = {"/followers/{id}", "/followers"})
-  public ResponseEntity< ResponseListDto<UserFollowersFollowing>> getFollowersForUserId(@AuthenticationPrincipal OAuth2User principal,
-                                                      @PathVariable(value = "id",required = false) String id) {
-    if(id == null){
+  public ResponseEntity<ResponseListDto<UserFollowersFollowing>> getFollowersForUserId(
+      @AuthenticationPrincipal OAuth2User principal,
+      @PathVariable(value = "id", required = false) String id) {
+    if (id == null) {
       id = authService.getUserIdFromAuth(principal);
     }
     ResponseListDto<UserFollowersFollowing> response = userService.getFollowersForUserId(id);
     return new ResponseEntity<>(response, response.getStatus());
   }
 
+  /**
+   * Endpoint to get a list of following for a user id
+   *
+   * @param principal the authenticated user
+   * @param id        the id of the user
+   * @return the response entity result
+   */
   @GetMapping(value = {"/following/{id}", "/followers"})
-  public ResponseEntity< ResponseListDto<UserFollowersFollowing>> getFollowingForUserId(@AuthenticationPrincipal OAuth2User principal,
-                                                                                        @PathVariable(value = "id",required = false) String id) {
-    if(id == null){
+  public ResponseEntity<ResponseListDto<UserFollowersFollowing>> getFollowingForUserId(
+      @AuthenticationPrincipal OAuth2User principal,
+      @PathVariable(value = "id", required = false) String id) {
+    if (id == null) {
       id = authService.getUserIdFromAuth(principal);
     }
     ResponseListDto<UserFollowersFollowing> response = userService.getFollowingForUserId(id);
     return new ResponseEntity<>(response, response.getStatus());
   }
 
+  /**
+   * Endpoint to get the authenticated user details
+   *
+   * @param principal the authenticated user
+   * @return the response entity
+   */
   @GetMapping(value = "/user")
-  public ResponseEntity<GetResponseDto<UserToDisplay>> getAuthenticatedUser(@AuthenticationPrincipal OAuth2User principal){
+  public ResponseEntity<GetResponseDto<UserToDisplay>> getAuthenticatedUser(
+      @AuthenticationPrincipal OAuth2User principal) {
     User user = userRepository.findById(principal.getName()).get();
-    UserToDisplay userToDisplay = new UserToDisplay(user.getFirstName(), user.getLastName(),"Followers: " +  (user.getFollowers() != null ? user.getFollowers().size() : "0"),
-        "Following: " + (user.getFollowing() != null ? user.getFollowing().size() : 0), user.getEmail(), true,  false, false);
+    UserToDisplay userToDisplay = new UserToDisplay(user.getFirstName(), user.getLastName(),
+        "Followers: " + (user.getFollowers() != null ? user.getFollowers().size() : "0"),
+        "Following: " + (user.getFollowing() != null ? user.getFollowing().size() : 0),
+        user.getEmail(), true, false, false);
     return new ResponseEntity<>(new GetResponseDto<>(userToDisplay), HttpStatus.OK);
   }
 }

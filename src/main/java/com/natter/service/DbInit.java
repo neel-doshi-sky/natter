@@ -101,5 +101,38 @@ public class DbInit {
 
     userFollowersFollowingRepository.saveAll(List.of(userFollowersFollowing, userFollowersFollowing1, userFollowersFollowing2, userFollowersFollowing3));
 
+    NatterCreateRequest natterCreateRequest5 = new NatterCreateRequest();
+    natterCreateRequest.setParentNatterId(null);
+    natterCreateRequest.setBody("What a day to be alive!");
+
+
+    NatterCreateRequest natterCreateRequest6 = new NatterCreateRequest();
+    natterCreateRequest1.setParentNatterId(null);
+    natterCreateRequest1.setBody("Ever thought about why someone decided to try cows milk and thought yeah thats nice?");
+
+    NatterCreateRequest natterCreateRequest7 = new NatterCreateRequest();
+    natterCreateRequest2.setParentNatterId(null);
+    natterCreateRequest2.setBody("ENGLANDDDDDD!!!");
+
+    NatterCreateRequest natterCreateRequest8 = new NatterCreateRequest();
+    natterCreateRequest3.setParentNatterId(null);
+    natterCreateRequest3.setBody("Liverpool need to win a CL or PL next season! Up the Reds!");
+
+    List<NatterCreateRequest> natterCreateRequests2 =
+        List.of(natterCreateRequest7, natterCreateRequest8);
+
+
+    OAuth2User oAuth2User2= new DefaultOAuth2User(new ArrayList<>(), Map.of("sub","8", "name", "Fred Robbins"), "name");
+
+    for (NatterCreateRequest request : natterCreateRequests2) {
+      natterService.create(request, oAuth2User2);
+    }
+    List<NatterCreateRequest> natterCreateRequests3 =
+        List.of(natterCreateRequest5, natterCreateRequest6);
+
+    OAuth2User oAuth2User3= new DefaultOAuth2User(new ArrayList<>(), Map.of("sub","11", "name", "Julie Herald"), "name");
+    for (NatterCreateRequest request : natterCreateRequests3) {
+      natterService.create(request, oAuth2User3);
+    }
   }
 }

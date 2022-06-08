@@ -56,15 +56,13 @@ public class NatterController {
   /**
    * Endpoint to get all tweets for the authenticated user
    *
-   * @param principal the authenticated user
    * @return the response entity containing the list of natters
    */
   @GetMapping(value = "/")
-  public ResponseEntity<ResponseListDto<NatterByAuthor>> listAllNatters(
-      @AuthenticationPrincipal OAuth2User principal) {
+  public ResponseEntity<ResponseListDto<NatterByAuthor>> listAllNatters(@AuthenticationPrincipal OAuth2User principal) {
 
     ResponseListDto<NatterByAuthor> natterListResponse =
-        natterService.getAllNatters(authService.getUserIdFromAuth(principal));
+        natterService.getAllNatters();
     return new ResponseEntity<>(natterListResponse, HttpStatus.OK);
 
   }

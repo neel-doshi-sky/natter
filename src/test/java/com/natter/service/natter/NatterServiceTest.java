@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.natter.dto.CreateResponseDto;
+import com.natter.dto.GetResponseDto;
+import com.natter.dto.NatterDto;
 import com.natter.dto.ResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.enums.natter.ErrorMessageNatterEnum;
@@ -206,6 +208,20 @@ class  NatterServiceTest {
   }
 
   @Test
+  public void whenListAllNatters_returnNatters(){
+    List<NatterByAuthor> nattersToReturn = natterServiceTestHelper.getListOfNatters();
+    when(natterByAuthorRepository.findAll()).thenReturn(nattersToReturn);
+    ResponseListDto<NatterByAuthor> responseDto = natterService.getAllNatters();
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertEquals(nattersToReturn.size(), responseDto.getList().size()),
+        () -> assertEquals(1, responseDto.getUserMessages().size()),
+        () -> assertEquals(SuccessMessageNatterEnum.FETCHED_All_NATTERS.getMessage(), responseDto.getUserMessages().get(
+            SuccessMessageNatterEnum.FETCHED_All_NATTERS.getCode()))
+    );
+  }
+
+  @Test
   public void whenNatterUpdateBodyIsValid_AndUserHasAccess_UpdateNatter_ReturnUpdatedNatter(){
     NatterUpdateRequest natterUpdateRequest = new NatterUpdateRequest("123", "UPDATE");
     NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
@@ -293,6 +309,19 @@ class  NatterServiceTest {
         () -> assertNotNull(responseDto.getCreated())
     );
 
+  }
+
+  @Test
+  public void whenGetNatterById_natterIdIsNull_returnError() throws DatabaseErrorException {
+    GetResponseDto<NatterDto> responseDto = natterService.getNatterById(null, "123");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getErrorMessages()),
+        () -> assertEquals(1, responseDto.getErrorMessages().size()),
+        () -> assertEquals(
+            ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.NATTER_NULL_ID.getCode()))
+    );
   }
 
 }
