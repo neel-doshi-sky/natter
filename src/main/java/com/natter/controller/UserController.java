@@ -115,4 +115,16 @@ public class UserController {
         user.getEmail(), true, false, false);
     return new ResponseEntity<>(new GetResponseDto<>(userToDisplay), HttpStatus.OK);
   }
+
+  @GetMapping(value = "/user/{id}")
+  public ResponseEntity<GetResponseDto<UserToDisplay>> getUserById(
+      @AuthenticationPrincipal OAuth2User principal,
+      @PathVariable(value = "id", required = false) String id) {
+    User user = userRepository.findById(id).get();
+    UserToDisplay userToDisplay = new UserToDisplay(user.getFirstName(), user.getLastName(),
+        "Followers: " + (user.getFollowers() != null ? user.getFollowers().size() : "0"),
+        "Following: " + (user.getFollowing() != null ? user.getFollowing().size() : 0),
+        user.getEmail(), true, false, false);
+    return new ResponseEntity<>(new GetResponseDto<>(userToDisplay), HttpStatus.OK);
+  }
 }

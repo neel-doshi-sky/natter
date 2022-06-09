@@ -122,7 +122,7 @@ public class DbInit {
         List.of(natterCreateRequest7, natterCreateRequest8);
 
 
-    OAuth2User oAuth2User2= new DefaultOAuth2User(new ArrayList<>(), Map.of("sub","8", "name", "Fred Robbins"), "name");
+    OAuth2User oAuth2User2= new DefaultOAuth2User(new ArrayList<>(), Map.of("sub",user1.getId(), "name", "Fred Robbins"), "name");
 
     for (NatterCreateRequest request : natterCreateRequests2) {
       natterService.create(request, oAuth2User2);
