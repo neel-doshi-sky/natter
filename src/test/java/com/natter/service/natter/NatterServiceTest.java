@@ -2,6 +2,7 @@ package com.natter.service.natter;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -285,7 +286,7 @@ class  NatterServiceTest {
   }
 
   @Test
-  public void whenCommentAdded_parentNatterIdIsInValid_returnError() throws DatabaseErrorException {
+  public void whenCommentAdded_parentNatterIdIsInValid_returnError() {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", "23");
     when(natterByIdRepository.findById(natterCreateRequest.getParentNatterId())).thenReturn(Optional.empty());
     CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, oAuth2User);
@@ -312,7 +313,7 @@ class  NatterServiceTest {
   }
 
   @Test
-  public void whenGetNatterById_natterIdIsNull_returnError() throws DatabaseErrorException {
+  public void whenGetNatterById_natterIdIsNull_returnError() {
     GetResponseDto<NatterDto> responseDto = natterService.getNatterById(null, "123");
     assertAll(
         () -> assertNotNull(responseDto),
@@ -321,6 +322,56 @@ class  NatterServiceTest {
         () -> assertEquals(
             ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage(), responseDto.getErrorMessages().get(
                 ErrorMessageNatterEnum.NATTER_NULL_ID.getCode()))
+    );
+  }
+
+  @Test
+  public void whenGetNatterById_natterIdIsInvalid_returnError() {
+    when(natterByIdRepository.findById(any())).thenReturn(Optional.empty());
+    GetResponseDto<NatterDto> responseDto = natterService.getNatterById("1", "123");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getErrorMessages()),
+        () -> assertEquals(1, responseDto.getErrorMessages().size()),
+        () -> assertEquals(
+            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode()))
+    );
+  }
+
+  @Test
+  public void whenGetNatterById_natterIdIsValid_returnNatterByIdWithNoComments() {
+    NatterById natter = natterServiceTestHelper.getValidNatterByIdWithoutComments();
+    when(natterByIdRepository.findById(any())).thenReturn(Optional.of(natter));
+    GetResponseDto<NatterDto> responseDto = natterService.getNatterById("12323", "123");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getUserMessages()),
+        () -> assertNotNull(responseDto.getResponseObject()),
+        () -> assertEquals("12323", responseDto.getResponseObject().getId()),
+        () -> assertEquals(1, responseDto.getUserMessages().size()),
+        () -> assertEquals(
+            SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getMessage(), responseDto.getUserMessages().get(
+                SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getCode()))
+    );
+  }
+
+  @Test
+  public void whenGetNatterById_natterIdIsValid_returnNatterByIdWithComments() {
+    NatterById natter = natterServiceTestHelper.getValidNatterByIdWithComments();
+    when(natterByIdRepository.findById(any())).thenReturn(Optional.of(natter));
+    when(natterByIdRepository.findAllById(any())).thenReturn(natterServiceTestHelper.getCommentsForNatter(natter.getId()));
+    GetResponseDto<NatterDto> responseDto = natterService.getNatterById("12323", "123");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getResponseObject()),
+        () -> assertEquals("12323", responseDto.getResponseObject().getId()),
+        () -> assertFalse(responseDto.getResponseObject().getComments().isEmpty()),
+        () -> assertNotNull(responseDto.getUserMessages()),
+        () -> assertEquals(1, responseDto.getUserMessages().size()),
+        () -> assertEquals(
+            SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getMessage(), responseDto.getUserMessages().get(
+                SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getCode()))
     );
   }
 

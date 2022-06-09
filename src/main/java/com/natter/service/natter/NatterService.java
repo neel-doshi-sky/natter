@@ -256,23 +256,14 @@ public class NatterService {
    */
   public GetResponseDto<NatterDto> getNatterById(final String id, @NonNull final String authId) {
     GetResponseDto<NatterDto> response = new GetResponseDto<>();
+    List<NatterDto> commentsDto = new ArrayList<>();
     if (id != null) {
       try {
         NatterById natterById = natterByIdRepository.findById(id).orElseThrow();
         List<String> commentIds = natterById.getComments();
-        List<NatterById> comments = natterByIdRepository.findAllById(commentIds);
-        List<NatterDto> commentsDto = new ArrayList<>();
-        List<NatterDto> finalCommentsDto = commentsDto;
-        comments.forEach(comment -> {
-          NatterDto natterDto =
-              new NatterDto(comment.getId(), comment.getBody(), comment.getParentNatterId(),
-                  comment.getDateCreated(), comment.getDateUpdated(), comment.getAuthorId(),
-                  comment.getAuthorName(), Objects.equals(authId, comment.getAuthorId()));
-          finalCommentsDto.add(natterDto);
-        });
-        commentsDto = finalCommentsDto.stream()
-            .sorted(Comparator.comparing(NatterDto::getDateUpdated).reversed()).collect(
-                Collectors.toList());
+        if (!commentIds.isEmpty()) {
+          commentsDto = getCommentsForNatterByCommentIds(commentIds, authId);
+        }
         response.setResponseObject(
             new NatterDto(natterById.getId(), natterById.getBody(), natterById.getParentNatterId(),
                 natterById.getDateCreated(), natterById.getDateUpdated(), natterById.getAuthorId(),
@@ -295,5 +286,28 @@ public class NatterService {
     }
 
     return response;
+  }
+
+  /**
+   * Method to get all comments for natter by the comment ids, this will sort and return them by date updated
+   *
+   * @param commentIds the comment ids from the natter object
+   * @param authId     the authenticated user
+   * @return list of NatterDto representing the comments
+   */
+  private List<NatterDto> getCommentsForNatterByCommentIds(@NonNull final List<String> commentIds,
+                                                           String authId) {
+    List<NatterById> comments = natterByIdRepository.findAllById(commentIds);
+    List<NatterDto> commentsDto = new ArrayList<>();
+    comments.forEach(comment -> {
+      NatterDto natterDto =
+          new NatterDto(comment.getId(), comment.getBody(), comment.getParentNatterId(),
+              comment.getDateCreated(), comment.getDateUpdated(), comment.getAuthorId(),
+              comment.getAuthorName(), Objects.equals(authId, comment.getAuthorId()));
+      commentsDto.add(natterDto);
+    });
+    return commentsDto.stream()
+        .sorted(Comparator.comparing(NatterDto::getDateUpdated).reversed()).collect(
+            Collectors.toList());
   }
 }
