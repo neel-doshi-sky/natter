@@ -7,6 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class UserToDisplay {
 
+  private String id;
 
   private String firstName;
 
@@ -24,7 +25,7 @@ public class UserToDisplay {
 
   private boolean isLoggedInUser;
 
-  private boolean isFollowing;
+  private boolean userIsFollowing;
 
-  private boolean isAFollower;
+  private boolean userIsAFollower;
 }

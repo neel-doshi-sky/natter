@@ -9,6 +9,7 @@ import com.natter.model.user.UserFollowersFollowing;
 import com.natter.repository.user.UserRepository;
 import com.natter.service.AuthService;
 import com.natter.service.user.UserService;
+import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -105,26 +106,24 @@ public class UserController {
    * @param principal the authenticated user
    * @return the response entity
    */
-  @GetMapping(value = "/user")
+  @GetMapping(value = {"/{id}", "/"})
   public ResponseEntity<GetResponseDto<UserToDisplay>> getAuthenticatedUser(
-      @AuthenticationPrincipal OAuth2User principal) {
-    User user = userRepository.findById(principal.getName()).get();
-    UserToDisplay userToDisplay = new UserToDisplay(user.getFirstName(), user.getLastName(),
+      @AuthenticationPrincipal OAuth2User principal, @PathVariable(required = false) String id) {
+    if(id == null || id.isEmpty()){
+      id = authService.getUserIdFromAuth(principal);
+    }
+    User user = userRepository.findById(id).orElseThrow();
+    if(user.getFollowers() == null){
+      user.setFollowers(new HashSet<>());
+    }
+    if(user.getFollowing() == null) {
+      user.setFollowing(new HashSet<>());
+    }
+    UserToDisplay userToDisplay = new UserToDisplay(user.getId(), user.getFirstName(), user.getLastName(),
         "Followers: " + (user.getFollowers() != null ? user.getFollowers().size() : "0"),
         "Following: " + (user.getFollowing() != null ? user.getFollowing().size() : 0),
-        user.getEmail(), true, false, false);
+        user.getEmail(), user.getId().equals(principal.getName()), user.getFollowers().contains(principal.getName()), user.getFollowing().contains(principal.getName()));
     return new ResponseEntity<>(new GetResponseDto<>(userToDisplay), HttpStatus.OK);
   }
 
-  @GetMapping(value = "/user/{id}")
-  public ResponseEntity<GetResponseDto<UserToDisplay>> getUserById(
-      @AuthenticationPrincipal OAuth2User principal,
-      @PathVariable(value = "id", required = false) String id) {
-    User user = userRepository.findById(id).get();
-    UserToDisplay userToDisplay = new UserToDisplay(user.getFirstName(), user.getLastName(),
-        "Followers: " + (user.getFollowers() != null ? user.getFollowers().size() : "0"),
-        "Following: " + (user.getFollowing() != null ? user.getFollowing().size() : 0),
-        user.getEmail(), true, false, false);
-    return new ResponseEntity<>(new GetResponseDto<>(userToDisplay), HttpStatus.OK);
-  }
 }

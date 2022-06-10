@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run App" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.natter.NatterApplication" />
-    <module name="natter.main" />
+    <module name="natter.natter-api.main" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.natter.controller.*" />
