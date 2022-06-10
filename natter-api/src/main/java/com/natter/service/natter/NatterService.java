@@ -311,4 +311,8 @@ public class NatterService {
         .sorted(Comparator.comparing(NatterDto::getDateUpdated).reversed()).collect(
             Collectors.toList());
   }
+
+  public ResponseDto likeNatter(String authId, String natterId) {
+    return null;
+  }
 }

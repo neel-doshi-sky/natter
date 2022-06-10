@@ -31,4 +31,7 @@ public class NatterByAuthor {
 
   @Column(value = "parent_author_id")
   private String parentAuthorId;
+
+  @Column
+  private int likes = 0;
 }

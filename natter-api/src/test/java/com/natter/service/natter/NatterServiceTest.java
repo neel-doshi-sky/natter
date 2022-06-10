@@ -65,8 +65,7 @@ class  NatterServiceTest {
 
   @Test
   public void whenNatterIsNull_ReturnNoNatterToCreateMessageToUser() {
-    NatterCreateRequest natter = null;
-    CreateResponseDto<NatterById> response = natterService.create(natter, oAuth2User);
+    CreateResponseDto<NatterById> response = natterService.create(null, oAuth2User);
     assertAll(
         () -> assertNotNull(response),
         () -> assertEquals(1, response.getErrorMessages().size()),
@@ -373,6 +372,49 @@ class  NatterServiceTest {
             SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getMessage(), responseDto.getUserMessages().get(
                 SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getCode()))
     );
+  }
+
+  @Test
+  public void whenLikeNatter_natterIdIsnull_returnError(){
+    ResponseDto responseDto = natterService.likeNatter("123", null);
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getErrorMessages()),
+        () -> assertEquals(1, responseDto.getErrorMessages().size()),
+        () -> assertEquals(
+            ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.NATTER_NULL_ID.getCode()))
+    );
+  }
+  @Test
+  public void whenLikeNatter_natterIdIsInvalid_returnError(){
+    when(natterByIdRepository.findById(any())).thenReturn(Optional.empty());
+    ResponseDto responseDto = natterService.likeNatter("123", "1");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getErrorMessages()),
+        () -> assertEquals(1, responseDto.getErrorMessages().size()),
+        () -> assertEquals(
+            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode()))
+    );
+  }
+
+  @Test
+  public void whenLikeNatter_natterIdIsValid_returnSuccess(){
+    NatterById natter = natterServiceTestHelper.getValidNatterByIdWithComments();
+    when(natterByIdRepository.findById(any())).thenReturn(Optional.of(natter));
+    ResponseDto responseDto = natterService.likeNatter("123", "1");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getUserMessages()),
+        () -> assertEquals(1, responseDto.getUserMessages().size()),
+        () -> assertEquals(
+            SuccessMessageNatterEnum.REACT_SUCCESS.getMessage(), responseDto.getErrorMessages().get(
+                SuccessMessageNatterEnum.REACT_SUCCESS.getCode()))
+    );
+    verify(natterByIdRepository.save(any()));
+    verify(natterByIdRepository.save(any()));
   }
 
 }

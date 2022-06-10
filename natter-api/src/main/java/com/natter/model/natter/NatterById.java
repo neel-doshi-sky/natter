@@ -54,4 +54,8 @@ public class NatterById {
   @Column
   private List<String> comments = new ArrayList<>();
 
+  @CassandraType(type = CassandraType.Name.TEXT)
+  @Column
+  private List<String> likes = new ArrayList<>();
+
 }
