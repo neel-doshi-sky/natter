@@ -26,6 +26,7 @@ import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
+import com.natter.util.MessageUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -375,7 +376,7 @@ class  NatterServiceTest {
   }
 
   @Test
-  public void whenLikeNatter_natterIdIsnull_returnError(){
+  public void whenLikeNatter_natterIdIsnull_returnError() throws DatabaseErrorException {
     ResponseDto responseDto = natterService.likeNatter("123", null);
     assertAll(
         () -> assertNotNull(responseDto),
@@ -387,7 +388,7 @@ class  NatterServiceTest {
     );
   }
   @Test
-  public void whenLikeNatter_natterIdIsInvalid_returnError(){
+  public void whenLikeNatter_natterIdIsInvalid_returnError() throws DatabaseErrorException {
     when(natterByIdRepository.findById(any())).thenReturn(Optional.empty());
     ResponseDto responseDto = natterService.likeNatter("123", "1");
     assertAll(
@@ -401,20 +402,21 @@ class  NatterServiceTest {
   }
 
   @Test
-  public void whenLikeNatter_natterIdIsValid_returnSuccess(){
+  public void whenLikeNatter_natterIdIsValid_returnSuccess() throws DatabaseErrorException {
     NatterById natter = natterServiceTestHelper.getValidNatterByIdWithComments();
     when(natterByIdRepository.findById(any())).thenReturn(Optional.of(natter));
+    when(natterByAuthorRepository.findById((any()))).thenReturn(Optional.of(new NatterByAuthor()));
     ResponseDto responseDto = natterService.likeNatter("123", "1");
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertNotNull(responseDto.getUserMessages()),
         () -> assertEquals(1, responseDto.getUserMessages().size()),
         () -> assertEquals(
-            SuccessMessageNatterEnum.REACT_SUCCESS.getMessage(), responseDto.getErrorMessages().get(
+            SuccessMessageNatterEnum.REACT_SUCCESS.getMessage(), responseDto.getUserMessages().get(
                 SuccessMessageNatterEnum.REACT_SUCCESS.getCode()))
     );
-    verify(natterByIdRepository.save(any()));
-    verify(natterByIdRepository.save(any()));
+    verify(natterByIdRepository).save(any());
+    verify(natterByIdRepository).save(any());
   }
 
 }

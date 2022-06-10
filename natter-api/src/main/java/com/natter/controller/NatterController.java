@@ -1,14 +1,18 @@
 package com.natter.controller;
 
 import com.natter.dto.CreateResponseDto;
+import com.natter.dto.GetResponseDto;
+import com.natter.dto.NatterDto;
 import com.natter.dto.ResponseDto;
 import com.natter.dto.ResponseListDto;
+import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.service.AuthService;
 import com.natter.service.natter.NatterService;
+import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -147,9 +151,22 @@ public class NatterController {
    * @return the response entity containing the result of the operation
    */
   @GetMapping(value = "/{id}")
-  public ResponseEntity<ResponseDto> getById(@AuthenticationPrincipal OAuth2User principal,
-                                             @PathVariable String id) {
-    ResponseDto result = natterService.getNatterById(id, authService.getUserIdFromAuth(principal));
+  public ResponseEntity<GetResponseDto<NatterDto>> getById(@AuthenticationPrincipal OAuth2User principal,
+                                                           @PathVariable String id) {
+    GetResponseDto<NatterDto> result = natterService.getNatterById(id, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
+  }
+
+  @PostMapping(value = "/like/{id}")
+  public ResponseEntity<ResponseDto> likeNatter(@AuthenticationPrincipal OAuth2User principal,
+                                             @PathVariable String id) {
+    try {
+      ResponseDto result = natterService.likeNatter(authService.getUserIdFromAuth(principal), id);
+      return new ResponseEntity<>(result, result.getStatus());
+
+    } catch (DatabaseErrorException e){
+      return new ResponseEntity<>(new ResponseDto(natterService.getErrorMessageForEnum(e.getErrorMessageNatterEnum()), new HashMap<>(), HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
   }
 }

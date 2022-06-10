@@ -1,7 +1,11 @@
 package com.natter.model.natter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import lombok.Data;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.core.mapping.CassandraType;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
@@ -34,4 +38,8 @@ public class NatterByAuthor {
 
   @Column
   private int likes = 0;
+
+  @CassandraType(type = CassandraType.Name.TEXT)
+  @Column(value = "user_likes")
+  private List<String> userLikes = new ArrayList<>();
 }
