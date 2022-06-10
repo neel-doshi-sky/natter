@@ -20,7 +20,7 @@ public class UserDatabaseService {
    * @param currentUserId  the id of the current user
    * @param userToFollowId the id of the user to follow
    */
-  void updateFollowersForFollow(String currentUserId, String userToFollowId) throws
+  void followUser(String currentUserId, String userToFollowId) throws
       NoSuchElementException {
     UserFollowersFollowing currentUser = userFollowersFollowingRepository.findById(currentUserId).orElseThrow();
     UserFollowersFollowing userToFollow = userFollowersFollowingRepository.findById(userToFollowId).orElseThrow();
@@ -37,7 +37,7 @@ public class UserDatabaseService {
    * @param currentUserId    the id of the current user
    * @param userToUnfollowId the id of the user that is unfollowed
    */
-  void updateFollowersForUnfollow(String currentUserId, String userToUnfollowId) {
+  void unfollowUser(String currentUserId, String userToUnfollowId) {
     UserFollowersFollowing currentUser = userFollowersFollowingRepository.findById(currentUserId).orElseThrow();
     UserFollowersFollowing userToUnfollow = userFollowersFollowingRepository.findById(userToUnfollowId).orElseThrow();
     updateFollowerService.removeUserFromFollowerList(currentUserId, userToUnfollowId);

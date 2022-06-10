@@ -32,28 +32,28 @@ public class UserService {
   /**
    * Method to follow or unfollow a user if they exist
    *
-   * @param authUserId the authenticated user id
-   * @param id         the id of the user to follow or unfollow
+   * @param authUserId the authenticated user userIdToFollowOrUnfollow
+   * @param userIdToFollowOrUnfollow         the userIdToFollowOrUnfollow of the user to follow or unfollow
    * @param isFollow   is this a follow or unfollow request
    * @return the response dto
    */
-  public ResponseDto followOrUnfollowUserById(@NonNull final String authUserId, final String id,
+  public ResponseDto followOrUnfollowUserById(@NonNull final String authUserId, final String userIdToFollowOrUnfollow,
                                               final boolean isFollow) {
     ResponseDto response = new ResponseDto();
     try {
-      if (id == null) {
+      if (userIdToFollowOrUnfollow == null) {
         response.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_ID_NULL.getCode(),
             ErrorMessageUserEnum.USER_ID_NULL.getMessage()));
         response.setStatus(HttpStatus.BAD_REQUEST);
       } else {
-        UserInfo user = userInfoRepository.findById(id).orElseThrow();
+        UserInfo user = userInfoRepository.findById(userIdToFollowOrUnfollow).orElseThrow();
 
         if (isFollow) {
-          userDatabaseService.updateFollowersForFollow(authUserId, user.getId());
+          userDatabaseService.followUser(authUserId, user.getId());
           response.setUserMessages(Map.of(SuccessMessageUserEnum.FOLLOWED_USER.getCode(),
               SuccessMessageUserEnum.FOLLOWED_USER.getMessage()));
         } else {
-          userDatabaseService.updateFollowersForUnfollow(authUserId, user.getId());
+          userDatabaseService.unfollowUser(authUserId, user.getId());
           response.setUserMessages(Map.of(SuccessMessageUserEnum.UNFOLLOWED_USER.getCode(),
               SuccessMessageUserEnum.UNFOLLOWED_USER.getMessage()));
         }

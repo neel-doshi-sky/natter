@@ -268,7 +268,8 @@ public class NatterService {
             new NatterDto(natterById.getId(), natterById.getBody(), natterById.getParentNatterId(),
                 natterById.getDateCreated(), natterById.getDateUpdated(), natterById.getAuthorId(),
                 natterById.getAuthorName(), commentsDto,
-                Objects.equals(authId, natterById.getAuthorId())));
+                Objects.equals(authId, natterById.getAuthorId()),
+                natterById.getDateUpdated().isAfter(natterById.getDateCreated())));
         response.setStatus(HttpStatus.OK);
         response.setUserMessages(Map.of(SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getCode(),
             SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID.getMessage()));
@@ -303,7 +304,7 @@ public class NatterService {
       NatterDto natterDto =
           new NatterDto(comment.getId(), comment.getBody(), comment.getParentNatterId(),
               comment.getDateCreated(), comment.getDateUpdated(), comment.getAuthorId(),
-              comment.getAuthorName(), Objects.equals(authId, comment.getAuthorId()));
+              comment.getAuthorName(), Objects.equals(authId, comment.getAuthorId()), comment.getDateUpdated().isAfter(comment.getDateCreated()));
       commentsDto.add(natterDto);
     });
     return commentsDto.stream()

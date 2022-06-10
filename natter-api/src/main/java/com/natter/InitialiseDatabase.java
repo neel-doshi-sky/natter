@@ -8,6 +8,7 @@ import com.natter.repository.user.UserFollowersFollowingRepository;
 import com.natter.repository.user.UserInfoRepository;
 import com.natter.repository.user.UserRepository;
 import com.natter.service.natter.NatterService;
+import com.natter.service.user.UserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,6 +35,9 @@ public class InitialiseDatabase {
   @Autowired
   UserFollowersFollowingRepository userFollowersFollowingRepository;
 
+  @Autowired
+  UserService userService;
+
   @PostConstruct
   private void postConstruct() {
 
@@ -59,16 +63,20 @@ public class InitialiseDatabase {
         List.of(natterCreateRequest1, natterCreateRequest2, natterCreateRequest3,
             natterCreateRequest);
 
-    OAuth2User oAuth2User = new DefaultOAuth2User(new ArrayList<>(), Map.of("sub","115826771724477311086", "name", "Neel Doshi"), "name");
+    OAuth2User neel = new DefaultOAuth2User(new ArrayList<>(), Map.of("sub","115826771724477311086", "name", "Neel Doshi"), "name");
 
     for (NatterCreateRequest request : natterCreateRequests) {
-      natterService.create(request, oAuth2User);
+      natterService.create(request, neel);
     }
 
-    User user =
+    User neelUser =
+        new User(neel.getAttribute("sub"), "Neel", "Doshi", "neel.doshi.sky@gmail.com", new HashSet<>(), new HashSet<>(),
+            LocalDateTime.now());
+
+    User fred =
         new User("1", "Fred", "Bloggs", "fb@gmail.com", new HashSet<>(), new HashSet<>(),
             LocalDateTime.now());
-    User user1 =
+    User julie =
         new User("2", "Julie", "Hammond", "jh@gmail.com", new HashSet<>(), new HashSet<>(),
             LocalDateTime.now());
     User user2 =
@@ -77,29 +85,35 @@ public class InitialiseDatabase {
     User user3 =
         new User("4", "test", "user4", "test_user4@gmail.com", new HashSet<>(), new HashSet<>(),
             LocalDateTime.now());
-    userRepository.saveAll(List.of(user, user1, user2, user3));
+    userRepository.saveAll(List.of(neelUser, fred, julie, user2, user3));
+
+    UserInfo neelUserInfo =
+        new UserInfo(neelUser.getId(), neelUser.getFirstName(), neelUser.getLastName(), neelUser.getEmail());
 
     UserInfo userInfo =
-        new UserInfo(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+        new UserInfo(fred.getId(), fred.getFirstName(), fred.getLastName(), fred.getEmail());
     UserInfo userInfo2 =
-        new UserInfo(user1.getId(), user1.getFirstName(), user1.getLastName(), user1.getEmail());
+        new UserInfo(julie.getId(), julie.getFirstName(), julie.getLastName(), julie.getEmail());
     UserInfo userInfo3 =
         new UserInfo(user2.getId(), user2.getFirstName(), user2.getLastName(), user2.getEmail());
     UserInfo userInfo4 =
         new UserInfo(user3.getId(), user3.getFirstName(), user3.getLastName(), user3.getEmail());
 
-    userInfoRepository.saveAll(List.of(userInfo, userInfo2, userInfo3, userInfo4));
+    userInfoRepository.saveAll(List.of(neelUserInfo, userInfo, userInfo2, userInfo3, userInfo4));
+
+    UserFollowersFollowing neelFollowersFollowing =
+        new UserFollowersFollowing(neelUser.getId(), neelUser.getFirstName(), neelUser.getLastName(), 0, 0, neelUser.getEmail());
 
     UserFollowersFollowing userFollowersFollowing =
-        new UserFollowersFollowing(user.getId(), user.getFirstName(), user.getLastName(), 0, 0, user.getEmail());
+        new UserFollowersFollowing(fred.getId(), fred.getFirstName(), fred.getLastName(), 0, 0, fred.getEmail());
     UserFollowersFollowing userFollowersFollowing1 =
-        new UserFollowersFollowing(user1.getId(), user1.getFirstName(), user1.getLastName(), 0, 0, user1.getEmail());
+        new UserFollowersFollowing(julie.getId(), julie.getFirstName(), julie.getLastName(), 0, 0, julie.getEmail());
     UserFollowersFollowing userFollowersFollowing2 =
         new UserFollowersFollowing(user2.getId(), user2.getFirstName(), user2.getLastName(), 0, 0, user2.getEmail());
     UserFollowersFollowing userFollowersFollowing3 =
         new UserFollowersFollowing(user3.getId(), user3.getFirstName(), user3.getLastName(), 0, 0, user3.getEmail());
 
-    userFollowersFollowingRepository.saveAll(List.of(userFollowersFollowing, userFollowersFollowing1, userFollowersFollowing2, userFollowersFollowing3));
+    userFollowersFollowingRepository.saveAll(List.of(neelFollowersFollowing, userFollowersFollowing, userFollowersFollowing1, userFollowersFollowing2, userFollowersFollowing3));
 
     NatterCreateRequest natterCreateRequest5 = new NatterCreateRequest();
     natterCreateRequest5.setParentNatterId(null);
@@ -122,18 +136,24 @@ public class InitialiseDatabase {
         List.of(natterCreateRequest7, natterCreateRequest8);
 
 
-    OAuth2User oAuth2User2= new DefaultOAuth2User(new ArrayList<>(), Map.of("sub",user.getId(), "name", user.getFirstName() + " " + user.getLastName()), "name");
+    OAuth2User fredOauth= new DefaultOAuth2User(new ArrayList<>(), Map.of("sub",fred.getId(), "name", fred.getFirstName() + " " + fred.getLastName()), "name");
 
     for (NatterCreateRequest request : natterCreateRequests2) {
-      natterService.create(request, oAuth2User2);
+      natterService.create(request, fredOauth);
     }
     List<NatterCreateRequest> natterCreateRequests3 =
         List.of(natterCreateRequest5, natterCreateRequest6);
 
-    OAuth2User oAuth2User3= new DefaultOAuth2User(new ArrayList<>(), Map.of("sub",user1.getId(), "name", user1.getFirstName() + " " + user1.getLastName()), "name");
+    OAuth2User julieOath= new DefaultOAuth2User(new ArrayList<>(), Map.of("sub",julie.getId(), "name", julie.getFirstName() + " " + julie.getLastName()), "name");
     for (NatterCreateRequest request : natterCreateRequests3) {
-      natterService.create(request, oAuth2User3);
+      natterService.create(request, julieOath);
     }
+
+    userService.followOrUnfollowUserById(neel.getAttribute("sub"), julie.getId(), true);
+    userService.followOrUnfollowUserById(fred.getId(), neel.getAttribute("sub"), true);
+    userService.followOrUnfollowUserById(julie.getId(), neel.getAttribute("sub"), true);
+    userService.followOrUnfollowUserById(julie.getId(), fredOauth.getAttribute("sub"), true);
+
 
   }
 }
