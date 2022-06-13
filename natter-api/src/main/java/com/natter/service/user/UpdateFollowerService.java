@@ -3,6 +3,7 @@ package com.natter.service.user;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.natter.model.user.UserFollowersFollowing;
 import com.natter.repository.user.UserFollowersFollowingRepository;
+import java.util.NoSuchElementException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,37 @@ public class UpdateFollowerService {
     int newFollowingCount = increment ? user.getFollowing() + 1 : user.getFollowing() - 1;
     user.setFollowing(newFollowingCount);
     userFollowersFollowingRepository.save(user);
+  }
+  /**
+   * Method to update relevant tables when following a user
+   *
+   * @param currentUserId  the id of the current user
+   * @param userToFollowId the id of the user to follow
+   */
+  void followUser(String currentUserId, String userToFollowId) throws
+      NoSuchElementException {
+    UserFollowersFollowing currentUser = userFollowersFollowingRepository.findById(currentUserId).orElseThrow();
+    UserFollowersFollowing userToFollow = userFollowersFollowingRepository.findById(userToFollowId).orElseThrow();
+    addUserToFollowerList(currentUserId, userToFollowId);
+    updateFollowerCount(userToFollow, true);
+    addUserToFollowingList(currentUserId, userToFollowId);
+    updateFollowingCount(currentUser, true);
+
+  }
+
+  /**
+   * Method to update tables when unfollowing a user
+   *
+   * @param currentUserId    the id of the current user
+   * @param userToUnfollowId the id of the user that is unfollowed
+   */
+  void unfollowUser(String currentUserId, String userToUnfollowId) {
+    UserFollowersFollowing currentUser = userFollowersFollowingRepository.findById(currentUserId).orElseThrow();
+    UserFollowersFollowing userToUnfollow = userFollowersFollowingRepository.findById(userToUnfollowId).orElseThrow();
+    removeUserFromFollowerList(currentUserId, userToUnfollowId);
+    updateFollowerCount(userToUnfollow, false);
+    removeUserFromFollowingList(currentUserId, userToUnfollowId);
+    updateFollowingCount(currentUser, false);
   }
 
 

@@ -10,6 +10,7 @@ import com.natter.model.user.UserInfo;
 import com.natter.repository.user.UserFollowersFollowingRepository;
 import com.natter.repository.user.UserInfoRepository;
 import com.natter.repository.user.UserRepository;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -25,9 +26,12 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final UserInfoRepository userInfoRepository;
-  private final UserDatabaseService userDatabaseService;
   private final UserRepository userRepository;
   private final UserFollowersFollowingRepository userFollowersFollowingRepository;
+
+  private final UserDatabaseService userDatabaseService;
+
+  private final UpdateFollowerService updateFollowerService;
 
   /**
    * Method to follow or unfollow a user if they exist
@@ -49,11 +53,11 @@ public class UserService {
         UserInfo user = userInfoRepository.findById(userIdToFollowOrUnfollow).orElseThrow();
 
         if (isFollow) {
-          userDatabaseService.followUser(authUserId, user.getId());
+          updateFollowerService.followUser(authUserId, user.getId());
           response.setUserMessages(Map.of(SuccessMessageUserEnum.FOLLOWED_USER.getCode(),
               SuccessMessageUserEnum.FOLLOWED_USER.getMessage()));
         } else {
-          userDatabaseService.unfollowUser(authUserId, user.getId());
+          updateFollowerService.unfollowUser(authUserId, user.getId());
           response.setUserMessages(Map.of(SuccessMessageUserEnum.UNFOLLOWED_USER.getCode(),
               SuccessMessageUserEnum.UNFOLLOWED_USER.getMessage()));
         }
@@ -122,5 +126,9 @@ public class UserService {
     }
 
     return responseListDto;
+  }
+
+  public Set<String> getFollowingIdsForUser(@NonNull final String authId){
+    return userDatabaseService.getFollowingForUser(authId);
   }
 }

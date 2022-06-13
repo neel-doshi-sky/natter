@@ -50,7 +50,7 @@ public class NatterController {
   @GetMapping(value = {"/user/{id}", "/user"})
   public ResponseEntity<ResponseListDto<NatterByAuthor>> listUsersNatters(
       @AuthenticationPrincipal OAuth2User principal, @PathVariable(required = false) String id) {
-    if(id == null || id.isEmpty()){
+    if (id == null || id.isEmpty()) {
       id = authService.getUserIdFromAuth(principal);
     }
 
@@ -66,7 +66,8 @@ public class NatterController {
    * @return the response entity containing the list of natters
    */
   @GetMapping(value = "/")
-  public ResponseEntity<ResponseListDto<NatterByAuthor>> listAllNatters(@AuthenticationPrincipal OAuth2User principal) {
+  public ResponseEntity<ResponseListDto<NatterByAuthor>> listAllNatters(
+      @AuthenticationPrincipal OAuth2User principal) {
 
     ResponseListDto<NatterByAuthor> natterListResponse =
         natterService.getAllNatters();
@@ -151,22 +152,43 @@ public class NatterController {
    * @return the response entity containing the result of the operation
    */
   @GetMapping(value = "/{id}")
-  public ResponseEntity<GetResponseDto<NatterDto>> getById(@AuthenticationPrincipal OAuth2User principal,
-                                                           @PathVariable String id) {
-    GetResponseDto<NatterDto> result = natterService.getNatterById(id, authService.getUserIdFromAuth(principal));
+  public ResponseEntity<GetResponseDto<NatterDto>> getById(
+      @AuthenticationPrincipal OAuth2User principal,
+      @PathVariable String id) {
+    GetResponseDto<NatterDto> result =
+        natterService.getNatterById(id, authService.getUserIdFromAuth(principal));
     return new ResponseEntity<>(result, result.getStatus());
   }
 
+  /**
+   * Endpoint to like/unlike a natter by id
+   *
+   * @param principal the principal
+   * @param id        the id of the natter
+   * @return the response entity containing the result of the operation
+   */
   @PostMapping(value = "/like/{id}")
   public ResponseEntity<ResponseDto> likeNatter(@AuthenticationPrincipal OAuth2User principal,
-                                             @PathVariable String id) {
+                                                @PathVariable String id) {
     try {
       ResponseDto result = natterService.likeNatter(authService.getUserIdFromAuth(principal), id);
       return new ResponseEntity<>(result, result.getStatus());
 
-    } catch (DatabaseErrorException e){
-      return new ResponseEntity<>(new ResponseDto(natterService.getErrorMessageForEnum(e.getErrorMessageNatterEnum()), new HashMap<>(), HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (DatabaseErrorException e) {
+      return new ResponseEntity<>(
+          new ResponseDto(natterService.getErrorMessageForEnum(e.getErrorMessageNatterEnum()),
+              new HashMap<>(), HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+  }
+
+  @GetMapping(value = "/feed")
+  public ResponseEntity<ResponseListDto<NatterByAuthor>> listNattersForFollowing(
+      @AuthenticationPrincipal OAuth2User principal) {
+
+    ResponseListDto<NatterByAuthor> natterListResponse =
+        natterService.getNattersForFollowing(authService.getUserIdFromAuth(principal));
+    return new ResponseEntity<>(natterListResponse, HttpStatus.OK);
 
   }
 }

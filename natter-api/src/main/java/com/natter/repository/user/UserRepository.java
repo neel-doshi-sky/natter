@@ -1,6 +1,8 @@
 package com.natter.repository.user;
 
 import com.natter.model.user.User;
+import java.util.List;
+import java.util.Set;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,16 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends CassandraRepository<User, String> {
 
-  @Query(value = "UPDATE user SET followers = followers + {:followerId} WHERE id = :userIdToFollow;")
-  void addUserToFollowerList(@Param("followerId") final String followerId, @Param("userIdToFollow") final String userIdToFollow);
+  @Query(value = "select following from user where id=:authId")
+  Set<String> getFollowingList(@Param("authId") final String authId);
 
-  @Query(value = "UPDATE user SET following = following + {:userIdToFollow} WHERE id = :followerId;")
-  void addUserToFollowingList(@Param("followerId") final String followerId, @Param("userIdToFollow") final String userIdToFollow);
-
-
-  @Query(value = "UPDATE user SET followers = followers - {:followerId} WHERE id = :userIdToFollow;")
-  void removeUserFromFollowerList(@Param("followerId") final String followerId, @Param("userIdToFollow") final String userIdToFollow);
-
-  @Query(value = "UPDATE user SET following = following - {:userIdToFollow} WHERE id = :followerId;")
-  void removeUserFromFollowingList(@Param("followerId") final String followerId, @Param("userIdToFollow") final String userIdToFollow);
 }

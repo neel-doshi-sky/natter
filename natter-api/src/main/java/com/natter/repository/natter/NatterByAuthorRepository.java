@@ -4,6 +4,7 @@ import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +22,9 @@ public interface NatterByAuthorRepository
    */
   @Query(value = "select * from natters_by_author where author_id = :authorId")
   List<NatterByAuthor> findAllByAuthorId(@Param("authorId") String authorId);
+
+  @Query(value = "select * from natters_by_author where author_id in (:followingList)")
+  List<NatterByAuthor> findAllByAuthorIdList(@Param("followingList") Set<String> followingList);
 
   /**
    * Query to update the body of a natter by id

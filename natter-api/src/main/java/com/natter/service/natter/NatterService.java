@@ -14,16 +14,20 @@ import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
+import com.natter.model.user.UserFollowersFollowing;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
+import com.natter.service.user.UserService;
 import com.natter.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -45,6 +49,8 @@ public class NatterService {
   private final NatterDatabaseService natterDatabaseService;
 
   private final MessageUtil messageUtil = new MessageUtil();
+
+  private final UserService userService;
 
   /**
    * Method to create a natter item and save it to the database
@@ -351,6 +357,32 @@ public class NatterService {
 
     }
     return responseDto;
+  }
+
+
+  public ResponseListDto<NatterByAuthor> getNattersForFollowing(@NonNull final String authId) {
+    //TODO - Paginate the response
+    ResponseListDto<NatterByAuthor> natterListResponseDto = new ResponseListDto<>();
+    List<UserFollowersFollowing> userFollowersFollowingList = userService.getFollowingForUserId(authId).getList();
+    Set<String> followingList = userService.getFollowingIdsForUser(authId);
+//    for (UserFollowersFollowing userFollowersFollowing : userFollowersFollowingList){
+//      followingList.add(userFollowersFollowing.getId());
+//    }
+   List<NatterByAuthor> natterByAuthor = new ArrayList<>();
+    if(followingList.size() > 0){
+      natterByAuthor =
+          natterByAuthorRepository.findAllByAuthorIdList(followingList);
+      natterByAuthor = natterByAuthor.stream().filter(natter ->
+              natter.getParentAuthorId() == null)
+          .sorted(Comparator.comparing(NatterByAuthor::getDateUpdated).reversed())
+          .collect(Collectors.toList());
+    }
+
+    natterListResponseDto.setList(natterByAuthor);
+    natterListResponseDto.setStatus(HttpStatus.OK);
+    natterListResponseDto.setUserMessages(
+        getSuccessMessageForEnum(SuccessMessageNatterEnum.FETCHED_All_NATTERS));
+    return natterListResponseDto;
   }
 
   /**

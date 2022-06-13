@@ -274,7 +274,7 @@ class  NatterServiceTest {
   }
 
   @Test
-  public void whenCommentAdded_parentNatterIdIsNull_returnError() throws DatabaseErrorException {
+  public void whenCommentAdded_parentNatterIdIsNull_returnError() {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", null);
     CreateResponseDto<NatterById> responseDto = natterService.addComment(natterCreateRequest, oAuth2User);
     assertAll(
@@ -417,6 +417,20 @@ class  NatterServiceTest {
     );
     verify(natterByIdRepository).save(any());
     verify(natterByIdRepository).save(any());
+  }
+
+  @Test
+  public void whenListAllNattersForFollowing_returnNatters(){
+    List<NatterByAuthor> nattersToReturn = natterServiceTestHelper.getListOfNatters();
+    when(natterByAuthorRepository.findAll()).thenReturn(nattersToReturn);
+    ResponseListDto<NatterByAuthor> responseDto = natterService.getNattersForFollowing("123");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertEquals(nattersToReturn.size(), responseDto.getList().size()),
+        () -> assertEquals(1, responseDto.getUserMessages().size()),
+        () -> assertEquals(SuccessMessageNatterEnum.FETCHED_All_NATTERS.getMessage(), responseDto.getUserMessages().get(
+            SuccessMessageNatterEnum.FETCHED_All_NATTERS.getCode()))
+    );
   }
 
 }

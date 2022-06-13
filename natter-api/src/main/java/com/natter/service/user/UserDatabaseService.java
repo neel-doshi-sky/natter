@@ -1,8 +1,13 @@
 package com.natter.service.user;
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.natter.model.user.UserFollowersFollowing;
 import com.natter.repository.user.UserFollowersFollowingRepository;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,35 +19,20 @@ public class UserDatabaseService {
 
   private final UserFollowersFollowingRepository userFollowersFollowingRepository;
 
-  /**
-   * Method to update relevant tables when following a user
-   *
-   * @param currentUserId  the id of the current user
-   * @param userToFollowId the id of the user to follow
-   */
-  void followUser(String currentUserId, String userToFollowId) throws
-      NoSuchElementException {
-    UserFollowersFollowing currentUser = userFollowersFollowingRepository.findById(currentUserId).orElseThrow();
-    UserFollowersFollowing userToFollow = userFollowersFollowingRepository.findById(userToFollowId).orElseThrow();
-    updateFollowerService.addUserToFollowerList(currentUserId, userToFollowId);
-    updateFollowerService.updateFollowerCount(userToFollow, true);
-    updateFollowerService.addUserToFollowingList(currentUserId, userToFollowId);
-    updateFollowerService.updateFollowingCount(currentUser, true);
+  private final CqlSession session;
 
-  }
+
 
   /**
-   * Method to update tables when unfollowing a user
+   * Add user to follower list
    *
-   * @param currentUserId    the id of the current user
-   * @param userToUnfollowId the id of the user that is unfollowed
+   * @param userId     the id of the follower
    */
-  void unfollowUser(String currentUserId, String userToUnfollowId) {
-    UserFollowersFollowing currentUser = userFollowersFollowingRepository.findById(currentUserId).orElseThrow();
-    UserFollowersFollowing userToUnfollow = userFollowersFollowingRepository.findById(userToUnfollowId).orElseThrow();
-    updateFollowerService.removeUserFromFollowerList(currentUserId, userToUnfollowId);
-    updateFollowerService.updateFollowerCount(userToUnfollow, false);
-    updateFollowerService.removeUserFromFollowingList(currentUserId, userToUnfollowId);
-    updateFollowerService.updateFollowingCount(currentUser, false);
+  public Set<String> getFollowingForUser(@NonNull final String userId) {
+    String query =
+        String.format("select following from user where id='%s';", userId);
+    Set<String> users;
+    users = session.execute(query).iterator().next().getSet("following", String.class);
+    return users;
   }
 }
