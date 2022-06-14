@@ -23,9 +23,6 @@ public interface NatterByAuthorRepository
   @Query(value = "select * from natters_by_author where author_id = :authorId")
   List<NatterByAuthor> findAllByAuthorId(@Param("authorId") String authorId);
 
-  @Query(value = "select * from natters_by_author where author_id in (:followingList)")
-  List<NatterByAuthor> findAllByAuthorIdList(@Param("followingList") Set<String> followingList);
-
   /**
    * Query to update the body of a natter by id
    *

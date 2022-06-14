@@ -14,14 +14,12 @@ import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
-import com.natter.model.user.UserFollowersFollowing;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
 import com.natter.service.user.UserService;
 import com.natter.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -138,13 +136,9 @@ public class NatterService {
    */
   public ResponseListDto<NatterByAuthor> getNattersForUser(String authorId) {
     ResponseListDto<NatterByAuthor> natterListResponseDto = new ResponseListDto<>();
-    List<NatterByAuthor> natterByAuthor =
+    List<NatterByAuthor> natterByAuthorList =
         natterByAuthorRepository.findAllByAuthorId(authorId);
-    natterByAuthor = natterByAuthor.stream().filter(natter ->
-            natter.getParentAuthorId() == null)
-        .sorted(Comparator.comparing(NatterByAuthor::getDateUpdated).reversed())
-        .collect(Collectors.toList());
-    natterListResponseDto.setList(natterByAuthor);
+    natterListResponseDto.setList(sortByDateUpdated(natterByAuthorList));
     natterListResponseDto.setStatus(HttpStatus.OK);
     natterListResponseDto.setUserMessages(
         getSuccessMessageForEnum(SuccessMessageNatterEnum.FETCHED_NATTERS_BY_AUTHOR));
@@ -160,13 +154,9 @@ public class NatterService {
   public ResponseListDto<NatterByAuthor> getAllNatters() {
     //TODO - Paginate the response
     ResponseListDto<NatterByAuthor> natterListResponseDto = new ResponseListDto<>();
-    List<NatterByAuthor> natterByAuthor =
+    List<NatterByAuthor> natterByAuthorList =
         natterByAuthorRepository.findAll();
-    natterByAuthor = natterByAuthor.stream().filter(natter ->
-            natter.getParentAuthorId() == null)
-        .sorted(Comparator.comparing(NatterByAuthor::getDateUpdated).reversed())
-        .collect(Collectors.toList());
-    natterListResponseDto.setList(natterByAuthor);
+    natterListResponseDto.setList(sortByDateUpdated(natterByAuthorList));
     natterListResponseDto.setStatus(HttpStatus.OK);
     natterListResponseDto.setUserMessages(
         getSuccessMessageForEnum(SuccessMessageNatterEnum.FETCHED_All_NATTERS));
@@ -234,7 +224,7 @@ public class NatterService {
         } catch (DatabaseErrorException e) {
           responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
           responseDto.setErrorMessages(
-              getErrorMessageForEnum(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD));
+              getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR));
         }
 
       } else {
@@ -268,7 +258,8 @@ public class NatterService {
                 natterById.getDateCreated(), natterById.getDateUpdated(), natterById.getAuthorId(),
                 natterById.getAuthorName(), commentsDto,
                 Objects.equals(authId, natterById.getAuthorId()),
-                natterById.getDateUpdated().isAfter(natterById.getDateCreated()), natterById.getLikes().size(), natterById.getLikes()));
+                natterById.getDateUpdated().isAfter(natterById.getDateCreated()),
+                natterById.getLikes().size(), natterById.getLikes()));
         response.setStatus(HttpStatus.OK);
         response.setUserMessages(
             getSuccessMessageForEnum(SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID));
@@ -302,7 +293,8 @@ public class NatterService {
           new NatterDto(comment.getId(), comment.getBody(), comment.getParentNatterId(),
               comment.getDateCreated(), comment.getDateUpdated(), comment.getAuthorId(),
               comment.getAuthorName(), Objects.equals(authId, comment.getAuthorId()),
-              comment.getDateUpdated().isAfter(comment.getDateCreated()), comment.getLikes().size(), comment.getLikes());
+              comment.getDateUpdated().isAfter(comment.getDateCreated()), comment.getLikes().size(),
+              comment.getLikes());
       commentsDto.add(natterDto);
     });
     return commentsDto.stream()
@@ -315,8 +307,8 @@ public class NatterService {
    *
    * @param authId   the id of the authenticated user
    * @param natterId the natter id to like
-   * @return
-   * @throws DatabaseErrorException
+   * @return Response DTO containing result of operation
+   * @throws DatabaseErrorException the database error exception
    */
   public ResponseDto likeNatter(@NonNull final String authId, String natterId)
       throws DatabaseErrorException {
@@ -328,7 +320,7 @@ public class NatterService {
       try {
         boolean isLike = false;
         NatterById natterById = natterByIdRepository.findById(natterId).orElseThrow();
-        if(!natterById.getLikes().contains(authId)) {
+        if (!natterById.getLikes().contains(authId)) {
           isLike = true;
           natterById.getLikes().add(authId);
         } else {
@@ -337,7 +329,7 @@ public class NatterService {
         natterByIdRepository.save(natterById);
         NatterByAuthor natterByAuthor = natterByAuthorRepository.findById(
             new NatterByAuthorPrimaryKey(natterById.getAuthorId(), natterId)).orElseThrow();
-        if(isLike){
+        if (isLike) {
           natterByAuthor.getUserLikes().add(authId);
         } else {
           natterByAuthor.getUserLikes().remove(authId);
@@ -352,37 +344,55 @@ public class NatterService {
         responseDto.setErrorMessages(
             getErrorMessageForEnum(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER));
       } catch (IllegalArgumentException e) {
-        throw new DatabaseErrorException(ErrorMessageNatterEnum.UNABLE_TO_SAVE_RECORD);
+        throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
       }
 
     }
     return responseDto;
   }
 
-
+  /**
+   * Method to get a list of natters by following
+   *
+   * @param authId the authenticated user
+   * @return the Response List DTO containing list of natters
+   */
   public ResponseListDto<NatterByAuthor> getNattersForFollowing(@NonNull final String authId) {
     //TODO - Paginate the response
     ResponseListDto<NatterByAuthor> natterListResponseDto = new ResponseListDto<>();
-    List<UserFollowersFollowing> userFollowersFollowingList = userService.getFollowingForUserId(authId).getList();
-    Set<String> followingList = userService.getFollowingIdsForUser(authId);
-//    for (UserFollowersFollowing userFollowersFollowing : userFollowersFollowingList){
-//      followingList.add(userFollowersFollowing.getId());
-//    }
-   List<NatterByAuthor> natterByAuthor = new ArrayList<>();
-    if(followingList.size() > 0){
-      natterByAuthor =
-          natterByAuthorRepository.findAllByAuthorIdList(followingList);
-      natterByAuthor = natterByAuthor.stream().filter(natter ->
-              natter.getParentAuthorId() == null)
-          .sorted(Comparator.comparing(NatterByAuthor::getDateUpdated).reversed())
-          .collect(Collectors.toList());
+    List<NatterByAuthor> natterByAuthorList;
+
+    List<String> followingList = userService.getFollowingIdsForUser(authId);
+    followingList.add(authId);
+
+    try {
+      natterByAuthorList =
+          natterDatabaseService.getAllNattersForFollowing(Set.copyOf(followingList));
+      natterListResponseDto.setList(sortByDateUpdated(natterByAuthorList));
+      natterListResponseDto.setStatus(HttpStatus.OK);
+      natterListResponseDto.setUserMessages(
+          getSuccessMessageForEnum(SuccessMessageNatterEnum.FETCHED_All_NATTERS));
+
+    } catch (DatabaseErrorException e) {
+      natterListResponseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+      natterListResponseDto.setErrorMessages(getErrorMessageForEnum(e.getErrorMessageNatterEnum()));
     }
 
-    natterListResponseDto.setList(natterByAuthor);
-    natterListResponseDto.setStatus(HttpStatus.OK);
-    natterListResponseDto.setUserMessages(
-        getSuccessMessageForEnum(SuccessMessageNatterEnum.FETCHED_All_NATTERS));
     return natterListResponseDto;
+  }
+
+  /**
+   * Method to sort the natter list by date updated
+   *
+   * @param natterByAuthorList the natter list
+   * @return the sorted list
+   */
+  private List<NatterByAuthor> sortByDateUpdated(
+      @NonNull final List<NatterByAuthor> natterByAuthorList) {
+    return natterByAuthorList.stream().filter(natter ->
+            natter.getParentNatterId().isEmpty())
+        .sorted(Comparator.comparing(NatterByAuthor::getDateUpdated).reversed())
+        .collect(Collectors.toList());
   }
 
   /**

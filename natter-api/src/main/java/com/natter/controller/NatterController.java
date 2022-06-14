@@ -182,6 +182,12 @@ public class NatterController {
 
   }
 
+  /**
+   * Endpoint to get natter feed for users that the authenticated user follows
+   *
+   * @param principal the authenticated user
+   * @return list of natters for feed
+   */
   @GetMapping(value = "/feed")
   public ResponseEntity<ResponseListDto<NatterByAuthor>> listNattersForFollowing(
       @AuthenticationPrincipal OAuth2User principal) {

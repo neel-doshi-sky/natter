@@ -26,6 +26,7 @@ import com.natter.model.natter.NatterCreateRequest;
 import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
+import com.natter.service.user.UserService;
 import com.natter.util.MessageUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,6 +60,9 @@ class  NatterServiceTest {
 
   @Mock
   NatterValidationService natterValidationService;
+
+  @Mock
+  UserService userService;
 
   NatterServiceTestHelper natterServiceTestHelper = new NatterServiceTestHelper();
 
@@ -420,9 +425,14 @@ class  NatterServiceTest {
   }
 
   @Test
-  public void whenListAllNattersForFollowing_returnNatters(){
+  public void whenListAllNattersForFollowing_returnNatters() throws DatabaseErrorException {
     List<NatterByAuthor> nattersToReturn = natterServiceTestHelper.getListOfNatters();
-    when(natterByAuthorRepository.findAll()).thenReturn(nattersToReturn);
+    List<String> userIds = new ArrayList<>();
+    userIds.add("1");
+    userIds.add("2");
+    userIds.add("3");
+    when(userService.getFollowingIdsForUser(any())).thenReturn(userIds);
+    when( natterDatabaseService.getAllNattersForFollowing(any())).thenReturn(nattersToReturn);
     ResponseListDto<NatterByAuthor> responseDto = natterService.getNattersForFollowing("123");
     assertAll(
         () -> assertNotNull(responseDto),

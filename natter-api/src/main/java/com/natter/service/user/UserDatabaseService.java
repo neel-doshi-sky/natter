@@ -4,9 +4,13 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.natter.model.user.UserFollowersFollowing;
 import com.natter.repository.user.UserFollowersFollowingRepository;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,17 +26,18 @@ public class UserDatabaseService {
   private final CqlSession session;
 
 
-
   /**
-   * Add user to follower list
+   * Get user ids for the authenticated user's following list
    *
-   * @param userId     the id of the follower
+   * @param userId the id of the authenticated user
+   * @return list of user ids
    */
-  public Set<String> getFollowingForUser(@NonNull final String userId) {
+  public List<String> getFollowingForUser(@NonNull final String userId) {
     String query =
         String.format("select following from user where id='%s';", userId);
-    Set<String> users;
-    users = session.execute(query).iterator().next().getSet("following", String.class);
-    return users;
+    ResultSet resultSet = session.execute(query);
+    return new ArrayList<>(
+        Objects.requireNonNull(resultSet.iterator().next().getSet("following", String.class)));
+
   }
 }

@@ -36,12 +36,13 @@ public class UserService {
   /**
    * Method to follow or unfollow a user if they exist
    *
-   * @param authUserId the authenticated user userIdToFollowOrUnfollow
-   * @param userIdToFollowOrUnfollow         the userIdToFollowOrUnfollow of the user to follow or unfollow
-   * @param isFollow   is this a follow or unfollow request
+   * @param authUserId               the authenticated user userIdToFollowOrUnfollow
+   * @param userIdToFollowOrUnfollow the userIdToFollowOrUnfollow of the user to follow or unfollow
+   * @param isFollow                 is this a follow or unfollow request
    * @return the response dto
    */
-  public ResponseDto followOrUnfollowUserById(@NonNull final String authUserId, final String userIdToFollowOrUnfollow,
+  public ResponseDto followOrUnfollowUserById(@NonNull final String authUserId,
+                                              final String userIdToFollowOrUnfollow,
                                               final boolean isFollow) {
     ResponseDto response = new ResponseDto();
     try {
@@ -128,7 +129,13 @@ public class UserService {
     return responseListDto;
   }
 
-  public Set<String> getFollowingIdsForUser(@NonNull final String authId){
+  /**
+   * Method to get a list of user ids that the user follows
+   *
+   * @param authId the authenticated user
+   * @return the following ids in a list
+   */
+  public List<String> getFollowingIdsForUser(@NonNull final String authId) {
     return userDatabaseService.getFollowingForUser(authId);
   }
 }

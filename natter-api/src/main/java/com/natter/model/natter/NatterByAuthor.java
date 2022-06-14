@@ -1,11 +1,10 @@
 package com.natter.model.natter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.annotation.Transient;
+import lombok.NoArgsConstructor;
 import org.springframework.data.cassandra.core.mapping.CassandraType;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
@@ -13,6 +12,8 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("natters_by_author")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class NatterByAuthor {
 
   @PrimaryKey
@@ -33,13 +34,12 @@ public class NatterByAuthor {
   @Column(value = "author_name")
   private String authorName;
 
-  @Column(value = "parent_author_id")
-  private String parentAuthorId;
+  @Column(value = "parent_natter_id")
+  private String parentNatterId;
 
   @Column
   private int likes = 0;
 
-  @CassandraType(type = CassandraType.Name.TEXT)
   @Column(value = "user_likes")
-  private List<String> userLikes = new ArrayList<>();
+  private List<String> userLikes;
 }

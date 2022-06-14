@@ -12,22 +12,28 @@ public class NatterServiceTestHelper {
 
     NatterByAuthor natterByAuthor = new NatterByAuthor();
     natterByAuthor.setDateUpdated(LocalDateTime.now());
+    natterByAuthor.setParentNatterId("");
     NatterByAuthor natterByAuthor1 = new NatterByAuthor();
+    natterByAuthor1.setParentNatterId("");
     natterByAuthor1.setDateUpdated(LocalDateTime.now());
     NatterByAuthor natterByAuthor2 = new NatterByAuthor();
+    natterByAuthor2.setParentNatterId("");
     natterByAuthor2.setDateUpdated(LocalDateTime.now());
     NatterByAuthor natterByAuthor3 = new NatterByAuthor();
+    natterByAuthor3.setParentNatterId("");
     natterByAuthor3.setDateUpdated(LocalDateTime.now());
     NatterByAuthor natterByAuthor4 = new NatterByAuthor();
+    natterByAuthor4.setParentNatterId("");
     natterByAuthor4.setDateUpdated(LocalDateTime.now());
     NatterByAuthor natterByAuthor5 = new NatterByAuthor();
+    natterByAuthor5.setParentNatterId("");
     natterByAuthor5.setDateUpdated(LocalDateTime.now());
     return List.of(natterByAuthor, natterByAuthor2,natterByAuthor1, natterByAuthor3, natterByAuthor5, natterByAuthor4);
   }
 
   public NatterById getValidNatterByIdWithComments(){
     NatterById valid = new NatterById();
-    valid.setParentNatterId(null);
+    valid.setParentNatterId("");
     valid.setAuthorId("testUserId");
     valid.setBody("This is a natter!");
     valid.setId("12323");
@@ -38,7 +44,7 @@ public class NatterServiceTestHelper {
   }
   public NatterById getValidNatterByIdWithoutComments(){
     NatterById valid = new NatterById();
-    valid.setParentNatterId(null);
+    valid.setParentNatterId("");
     valid.setAuthorId("testUserId");
     valid.setBody("This is a natter!");
     valid.setId("12323");
