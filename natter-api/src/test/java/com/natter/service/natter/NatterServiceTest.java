@@ -27,14 +27,12 @@ import com.natter.model.natter.NatterUpdateRequest;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
 import com.natter.service.user.UserService;
-import com.natter.util.MessageUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -75,9 +73,9 @@ class  NatterServiceTest {
     assertAll(
         () -> assertNotNull(response),
         () -> assertEquals(1, response.getErrorMessages().size()),
-        () -> assertEquals(ErrorMessageNatterEnum.NATTER_CREATION_ERROR_NULL_BODY.getMessage(),
+        () -> assertEquals(ErrorMessageNatterEnum.NULL_BODY.getMessage(),
             response.getErrorMessages()
-                .get(ErrorMessageNatterEnum.NATTER_CREATION_ERROR_NULL_BODY.getCode())),
+                .get(ErrorMessageNatterEnum.NULL_BODY.getCode())),
         () -> assertTrue(response.getUserMessages().isEmpty()));
   }
 
@@ -144,8 +142,8 @@ class  NatterServiceTest {
         () -> assertNotNull(natterCreateResponseDto),
         () -> assertNotNull(natterCreateResponseDto.getErrorMessages()),
         () -> assertEquals(1, natterCreateResponseDto.getErrorMessages().size()),
-        () -> assertEquals(ErrorMessageNatterEnum.NATTER_CREATION_ERROR_NULL_BODY.getMessage(), natterCreateResponseDto.getErrorMessages().get(
-            ErrorMessageNatterEnum.NATTER_CREATION_ERROR_NULL_BODY.getCode()))
+        () -> assertEquals(ErrorMessageNatterEnum.NULL_BODY.getMessage(), natterCreateResponseDto.getErrorMessages().get(
+            ErrorMessageNatterEnum.NULL_BODY.getCode()))
     );
 
   }
@@ -177,8 +175,8 @@ class  NatterServiceTest {
         () -> assertNotNull(responseDto.getErrorMessages()),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
         () -> assertEquals(
-            ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage(), responseDto.getErrorMessages().get(
-                ErrorMessageNatterEnum.NATTER_NULL_ID.getCode()))
+            ErrorMessageNatterEnum.NULL_ID.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.NULL_ID.getCode()))
     );
 
   }
@@ -194,8 +192,8 @@ class  NatterServiceTest {
         () -> assertNotNull(responseDto),
         () -> assertNotNull(responseDto.getErrorMessages()),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
-        () -> assertEquals(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage(), responseDto.getErrorMessages().get(
-            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode()))
+        () -> assertEquals(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS.getMessage(), responseDto.getErrorMessages().get(
+            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS.getCode()))
     );
   }
 
@@ -262,6 +260,18 @@ class  NatterServiceTest {
   }
 
   @Test
+  public void whenNatterUpdateBodyIsNull_ReturnValidationError(){
+    NatterUpdateRequest natterUpdateRequest = new NatterUpdateRequest("123", null);
+    ResponseDto result = natterService.edit(natterUpdateRequest, "123");
+    assertAll(
+        () -> assertNotNull(result),
+        () -> assertEquals(1, result.getErrorMessages().size()),
+        () -> assertEquals(ErrorMessageNatterEnum.NULL_BODY.getMessage(), result.getErrorMessages().get(ErrorMessageNatterEnum.NULL_BODY.getCode())),
+        () -> assertTrue( result.getUserMessages().isEmpty())
+    );
+  }
+
+  @Test
   public void whenNatterUpdateBodyIsValid_AndUserHasNotGotAccess_ReturnAuthError(){
     NatterUpdateRequest natterUpdateRequest = new NatterUpdateRequest("123", "UPDATE");
     NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
@@ -273,8 +283,8 @@ class  NatterServiceTest {
         () -> assertNotNull(result),
         () -> assertEquals(1, result.getErrorMessages().size()),
         () -> assertTrue( result.getUserMessages().isEmpty()),
-        () -> assertEquals(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage(), result.getErrorMessages().get(
-            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode()))
+        () -> assertEquals(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS.getMessage(), result.getErrorMessages().get(
+            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS.getCode()))
     );
   }
 
@@ -325,8 +335,8 @@ class  NatterServiceTest {
         () -> assertNotNull(responseDto.getErrorMessages()),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
         () -> assertEquals(
-            ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage(), responseDto.getErrorMessages().get(
-                ErrorMessageNatterEnum.NATTER_NULL_ID.getCode()))
+            ErrorMessageNatterEnum.NULL_ID.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.NULL_ID.getCode()))
     );
   }
 
@@ -339,8 +349,8 @@ class  NatterServiceTest {
         () -> assertNotNull(responseDto.getErrorMessages()),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
         () -> assertEquals(
-            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage(), responseDto.getErrorMessages().get(
-                ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode()))
+            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.UNAUTHORISED_ACCESS.getCode()))
     );
   }
 
@@ -388,8 +398,8 @@ class  NatterServiceTest {
         () -> assertNotNull(responseDto.getErrorMessages()),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
         () -> assertEquals(
-            ErrorMessageNatterEnum.NATTER_NULL_ID.getMessage(), responseDto.getErrorMessages().get(
-                ErrorMessageNatterEnum.NATTER_NULL_ID.getCode()))
+            ErrorMessageNatterEnum.NULL_ID.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.NULL_ID.getCode()))
     );
   }
   @Test
@@ -401,8 +411,8 @@ class  NatterServiceTest {
         () -> assertNotNull(responseDto.getErrorMessages()),
         () -> assertEquals(1, responseDto.getErrorMessages().size()),
         () -> assertEquals(
-            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getMessage(), responseDto.getErrorMessages().get(
-                ErrorMessageNatterEnum.UNAUTHORISED_ACCESS_NATTER.getCode()))
+            ErrorMessageNatterEnum.UNAUTHORISED_ACCESS.getMessage(), responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.UNAUTHORISED_ACCESS.getCode()))
     );
   }
 

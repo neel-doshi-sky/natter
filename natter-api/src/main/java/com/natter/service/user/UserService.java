@@ -66,6 +66,7 @@ public class UserService {
 
       }
     } catch (NoSuchElementException e) {
+      log.error("unable to find user info record for user id: " + userIdToFollowOrUnfollow + ", error: " + e.getMessage());
       response.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_NOT_FOUND.getCode(),
           ErrorMessageUserEnum.USER_NOT_FOUND.getMessage()));
       response.setStatus(HttpStatus.NOT_FOUND);
@@ -93,6 +94,7 @@ public class UserService {
           SuccessMessageUserEnum.SUCCESS_GENERIC.getMessage()));
 
     } catch (NoSuchElementException e) {
+      log.error("unable to find user record for user id: " + userId + ", error: " + e.getMessage());
       responseListDto.setStatus(HttpStatus.NOT_FOUND);
       responseListDto.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_NOT_FOUND.getCode(),
           ErrorMessageUserEnum.USER_NOT_FOUND.getMessage()));
@@ -121,6 +123,7 @@ public class UserService {
           SuccessMessageUserEnum.SUCCESS_GENERIC.getMessage()));
 
     } catch (NoSuchElementException e) {
+      log.error("unable to find user record for user id: " + userId + ", error: " + e.getMessage());
       responseListDto.setStatus(HttpStatus.NOT_FOUND);
       responseListDto.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_NOT_FOUND.getCode(),
           ErrorMessageUserEnum.USER_NOT_FOUND.getMessage()));

@@ -23,8 +23,6 @@ public class NatterValidationService {
         validateStringField(createRequest.getBody(), NatterRequiredFieldsEnum.BODY));
     validationResults.putAll(validateStringField(createRequest.getParentNatterId(),
         NatterRequiredFieldsEnum.PARENT_NATTER_ID));
-
-
     return validationResults;
 
   }
@@ -68,9 +66,6 @@ public class NatterValidationService {
     }
     return errorMessage;
   }
-
-
-
 
 
 }

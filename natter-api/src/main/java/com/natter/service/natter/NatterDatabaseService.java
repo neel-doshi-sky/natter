@@ -185,7 +185,7 @@ public class NatterDatabaseService {
       parentByAuthor.setCommentCount(parentByAuthor.getCommentCount() - 1);
       natterByAuthorRepository.save(parentByAuthor);
     } catch (NoSuchElementException e){
-      log.error("Unable to find comment with id :" + natterById.getId() + ", error: " + e.getMessage());
+      log.error("Unable to find comment with id :" + natterById.getId() + ", error: " + e);
     }
   }
 
@@ -211,7 +211,7 @@ public class NatterDatabaseService {
       }
 
     } catch (AllNodesFailedException | QueryExecutionException | QueryValidationException e) {
-      log.error("error getting natters for following with message: " + e.getMessage());
+      log.error("error getting natters for following with message: " + e);
       throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
     }
 
