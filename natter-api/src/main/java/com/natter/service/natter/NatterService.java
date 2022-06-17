@@ -201,10 +201,10 @@ public class NatterService {
    * @param author         the author of the comment
    * @return the CreateResponseDto containing the response of the operation
    */
-  public CreateResponseDto<NatterById> addComment(NatterCreateRequest commentRequest,
+  public CreateResponseDto<NatterById> addComment(@NonNull final NatterCreateRequest commentRequest,
                                                   OAuth2User author) {
     CreateResponseDto<NatterById> responseDto = new CreateResponseDto<>();
-    if (commentRequest.getParentNatterId() == null) {
+    if (commentRequest.getParentNatterId() == null || commentRequest.getParentNatterId().isEmpty()) {
       responseDto.setErrorMessages(getErrorMessageForEnum(ErrorMessageNatterEnum.NATTER_NULL_ID));
       responseDto.setStatus(HttpStatus.BAD_REQUEST);
     } else {
@@ -320,6 +320,9 @@ public class NatterService {
       try {
         boolean isLike = false;
         NatterById natterById = natterByIdRepository.findById(natterId).orElseThrow();
+        if(natterById.getLikes() == null){
+          natterById.setLikes(new ArrayList<>());
+        }
         if (!natterById.getLikes().contains(authId)) {
           isLike = true;
           natterById.getLikes().add(authId);
@@ -329,6 +332,9 @@ public class NatterService {
         natterByIdRepository.save(natterById);
         NatterByAuthor natterByAuthor = natterByAuthorRepository.findById(
             new NatterByAuthorPrimaryKey(natterById.getAuthorId(), natterId)).orElseThrow();
+        if (natterByAuthor.getUserLikes() == null) {
+          natterByAuthor.setUserLikes(new ArrayList<>());
+        }
         if (isLike) {
           natterByAuthor.getUserLikes().add(authId);
         } else {

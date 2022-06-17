@@ -44,6 +44,9 @@ class UserServiceTest {
   UserRepository userRepository;
 
   @Mock
+  UpdateFollowerService updateFollowerService;
+
+  @Mock
   UserFollowersFollowingRepository userFollowersFollowingRepository;
 
   @Test

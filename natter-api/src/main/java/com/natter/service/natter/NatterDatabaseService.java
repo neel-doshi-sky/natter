@@ -27,11 +27,13 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class NatterDatabaseService {
@@ -73,6 +75,8 @@ public class NatterDatabaseService {
 
     NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
     if (natterByAuthorCreated.getId() == null) {
+      log.error(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + id + " , natterRequestBody: " +
+          natterCreateRequest);
       throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
     }
 
@@ -87,12 +91,14 @@ public class NatterDatabaseService {
         natterCreateRequest.getParentNatterId());
     NatterById createdNatter = natterByIdRepository.save(natterById);
     if (createdNatter.getId() == null) {
+      log.error(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + id + " , natterRequestBody: " +
+          natterCreateRequest);
       throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
     }
     return createdNatter;
   }
 
-  public void updateNatterAfterComment(NatterById natter) throws DatabaseErrorException {
+  public void updateNatterAfterComment(@NonNull final NatterById natter) throws DatabaseErrorException {
     natter.setDateUpdated(LocalDateTime.now());
 
     NatterByAuthorPrimaryKey natterByAuthorPrimaryKey = new NatterByAuthorPrimaryKey();
@@ -110,6 +116,8 @@ public class NatterDatabaseService {
 
     NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
     if (natterByAuthorCreated.getId() == null) {
+      log.error(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + natter.getId() + " , natter: " +
+          natter);
       throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
     }
     natterByIdRepository.save(natter);
@@ -124,8 +132,8 @@ public class NatterDatabaseService {
   public void delete(@NonNull final NatterById natterById) {
     NatterByAuthorPrimaryKey key =
         new NatterByAuthorPrimaryKey(natterById.getAuthorId(), natterById.getId());
-    if (natterById.getParentNatterId() != null) {
-      updateCommentCountForDeletion(natterById);
+    if (!natterById.getParentNatterId().isEmpty()) {
+      deleteCommentAndUpdateCommentCount(natterById);
     }
     natterByIdRepository.deleteById(natterById.getId());
     if (!natterById.getComments().isEmpty()) {
@@ -159,15 +167,26 @@ public class NatterDatabaseService {
 
   }
 
-  private void updateCommentCountForDeletion(NatterById natterById) throws NoSuchElementException {
-    NatterById parent = natterByIdRepository.findById(natterById.getParentNatterId()).orElseThrow();
-    parent.getComments().remove(natterById.getId());
-    natterByIdRepository.save(parent);
-    NatterByAuthor parentByAuthor =
-        natterByAuthorRepository.findById(new NatterByAuthorPrimaryKey(parent.getAuthorId(),
-            parent.getId())).orElseThrow();
-    parentByAuthor.setCommentCount(parentByAuthor.getCommentCount() - 1);
-    natterByAuthorRepository.save(parentByAuthor);
+  /**
+   * Method to delete a comment and update the comment count in other tables
+   *
+   * @param natterById the natter by id to delete
+   */
+  private void deleteCommentAndUpdateCommentCount(@NonNull final NatterById natterById) {
+    try {
+      NatterById parent = natterByIdRepository.findById(natterById.getParentNatterId()).orElseThrow();
+      if (parent.getComments() != null && parent.getComments().contains(natterById.getId())) {
+        parent.getComments().remove(natterById.getId());
+        natterByIdRepository.save(parent);
+      }
+      NatterByAuthor parentByAuthor =
+          natterByAuthorRepository.findById(new NatterByAuthorPrimaryKey(parent.getAuthorId(),
+              parent.getId())).orElseThrow();
+      parentByAuthor.setCommentCount(parentByAuthor.getCommentCount() - 1);
+      natterByAuthorRepository.save(parentByAuthor);
+    } catch (NoSuchElementException e){
+      log.error("Unable to find comment with id :" + natterById.getId() + ", error: " + e.getMessage());
+    }
   }
 
   /**
@@ -176,7 +195,7 @@ public class NatterDatabaseService {
    * @param followingIds the user ids to get the natters for
    * @return the natter list
    */
-  public List<NatterByAuthor> getAllNattersForFollowing(Set<String> followingIds)
+  public List<NatterByAuthor> getAllNattersForFollowing(@NonNull final Set<String> followingIds)
       throws DatabaseErrorException {
 
     List<NatterByAuthor> natterByAuthorList = new ArrayList<>();
@@ -192,6 +211,7 @@ public class NatterDatabaseService {
       }
 
     } catch (AllNodesFailedException | QueryExecutionException | QueryValidationException e) {
+      log.error("error getting natters for following with message: " + e.getMessage());
       throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
     }
 
