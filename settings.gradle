@@ -1,3 +1,4 @@
 rootProject.name = 'natter'
 include 'natter-api'
+include 'nattter-functional'
 

@@ -2,6 +2,7 @@ package com.natter.controller;
 
 import com.natter.service.AuthService;
 import com.natter.service.natter.NatterService;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,7 +18,7 @@ public class NatterControllerTest {
   AuthService authService;
 
   @InjectMocks
-  NatterController underTest;
+  NatterController natterController;
 
 
 }
