@@ -38,7 +38,6 @@ public class InitialiseDatabase {
   @Autowired
   UserService userService;
 
-  @PostConstruct
   private void postConstruct() {
 
 
