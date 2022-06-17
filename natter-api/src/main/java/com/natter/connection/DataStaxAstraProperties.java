@@ -1,4 +1,4 @@
-package com.natter;
+package com.natter.connection;
 
 import java.io.File;
 import lombok.Getter;

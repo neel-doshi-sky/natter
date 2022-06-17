@@ -1,4 +1,4 @@
-package com.natter;
+package com.natter.oauth;
 
 import com.natter.model.GoogleUserInfo;
 import com.natter.model.user.User;
