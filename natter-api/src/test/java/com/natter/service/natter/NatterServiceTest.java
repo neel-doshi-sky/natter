@@ -262,6 +262,7 @@ class  NatterServiceTest {
   @Test
   public void whenNatterUpdateBodyIsNull_ReturnValidationError(){
     NatterUpdateRequest natterUpdateRequest = new NatterUpdateRequest("123", null);
+    when(natterValidationService.validateNatterUpdateBody(natterUpdateRequest)).thenReturn(Map.of(ErrorMessageNatterEnum.NULL_BODY.getCode(), ErrorMessageNatterEnum.NULL_BODY.getMessage()));
     ResponseDto result = natterService.edit(natterUpdateRequest, "123");
     assertAll(
         () -> assertNotNull(result),

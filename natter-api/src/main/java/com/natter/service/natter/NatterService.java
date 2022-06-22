@@ -172,7 +172,7 @@ public class NatterService {
    */
   public ResponseDto edit(final NatterUpdateRequest updateRequest, final @NonNull String authorId) {
     ResponseDto responseDto = new ResponseDto();
-    if(updateRequest != null){
+    if(updateRequest == null){
       responseDto.setErrorMessages(getErrorMessageForEnum(ErrorMessageNatterEnum.NULL_BODY));
     } else {
       Map<String, String> validationResult =
