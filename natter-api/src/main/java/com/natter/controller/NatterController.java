@@ -48,7 +48,7 @@ public class NatterController {
    * @return the response entity containing the list of natters
    */
   @GetMapping(value = {"/user/{id}", "/user"})
-  public ResponseEntity<ResponseListDto<NatterByAuthor>> listUsersNatters(
+  public ResponseEntity<ResponseListDto<NatterByAuthor>> listNattersForUserId(
       @AuthenticationPrincipal OAuth2User principal, @PathVariable(required = false) String id) {
     if (id == null || id.isEmpty()) {
       id = authService.getUserIdFromAuth(principal);

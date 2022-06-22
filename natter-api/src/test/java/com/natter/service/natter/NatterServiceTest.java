@@ -198,6 +198,22 @@ class  NatterServiceTest {
   }
 
   @Test
+  public void whenDeleteIdDoesNotExist_returnNotFoundMessage(){
+    Optional<NatterById> optional = Optional.empty();
+    when(natterByIdRepository.findById(any())).thenReturn(optional);
+    ResponseDto responseDto = natterService.delete("123", "123");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getErrorMessages()),
+        () -> assertEquals(1, responseDto.getErrorMessages().size()),
+        () -> assertEquals(ErrorMessageNatterEnum.RECORD_NOT_FOUND.getMessage(), responseDto.getErrorMessages().get(
+            ErrorMessageNatterEnum.RECORD_NOT_FOUND.getCode()))
+    );
+  }
+
+
+
+  @Test
   public void whenListUserNatters_returnNatters(){
     List<NatterByAuthor> nattersToReturn = natterServiceTestHelper.getListOfNatters();
     when(natterByAuthorRepository.findAllByAuthorId(any())).thenReturn(nattersToReturn);

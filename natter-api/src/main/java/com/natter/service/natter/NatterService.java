@@ -120,8 +120,8 @@ public class NatterService {
         }
       } else {
         response.setErrorMessages(
-            getErrorMessageForEnum(ErrorMessageNatterEnum.UNABLE_TO_DELETE_RECORD));
-        response.setStatus(HttpStatus.FORBIDDEN);
+            getErrorMessageForEnum(ErrorMessageNatterEnum.RECORD_NOT_FOUND));
+        response.setStatus(HttpStatus.OK);
       }
     }
 

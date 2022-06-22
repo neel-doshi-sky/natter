@@ -1,6 +1,7 @@
 package com.natter.service.natter;
 
 import com.natter.model.natter.NatterByAuthor;
+import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.model.natter.NatterById;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,21 +14,27 @@ public class NatterServiceTestHelper {
     NatterByAuthor natterByAuthor = new NatterByAuthor();
     natterByAuthor.setDateUpdated(LocalDateTime.now());
     natterByAuthor.setParentNatterId("");
+    natterByAuthor.setId(new NatterByAuthorPrimaryKey("123", "1"));
     NatterByAuthor natterByAuthor1 = new NatterByAuthor();
     natterByAuthor1.setParentNatterId("");
     natterByAuthor1.setDateUpdated(LocalDateTime.now());
+    natterByAuthor1.setId(new NatterByAuthorPrimaryKey("123", "2"));
     NatterByAuthor natterByAuthor2 = new NatterByAuthor();
     natterByAuthor2.setParentNatterId("");
     natterByAuthor2.setDateUpdated(LocalDateTime.now());
+    natterByAuthor2.setId(new NatterByAuthorPrimaryKey("123", "3"));
     NatterByAuthor natterByAuthor3 = new NatterByAuthor();
     natterByAuthor3.setParentNatterId("");
     natterByAuthor3.setDateUpdated(LocalDateTime.now());
+    natterByAuthor3.setId(new NatterByAuthorPrimaryKey("123", "4"));
     NatterByAuthor natterByAuthor4 = new NatterByAuthor();
     natterByAuthor4.setParentNatterId("");
     natterByAuthor4.setDateUpdated(LocalDateTime.now());
+    natterByAuthor4.setId(new NatterByAuthorPrimaryKey("123", "5"));
     NatterByAuthor natterByAuthor5 = new NatterByAuthor();
     natterByAuthor5.setParentNatterId("");
     natterByAuthor5.setDateUpdated(LocalDateTime.now());
+    natterByAuthor5.setId(new NatterByAuthorPrimaryKey("123", "6"));
     return List.of(natterByAuthor, natterByAuthor2,natterByAuthor1, natterByAuthor3, natterByAuthor5, natterByAuthor4);
   }
 

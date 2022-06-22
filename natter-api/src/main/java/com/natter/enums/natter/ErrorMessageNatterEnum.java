@@ -15,7 +15,8 @@ public enum ErrorMessageNatterEnum {
   NULL_OR_EMPTY_FIELD("00011", "this field cannot be null/empty"),
   DATABASE_ERROR("50000", "unable to process your request"),
   UNABLE_TO_DELETE_RECORD("50001", "unable to delete record"),
-  UNAUTHORISED_ACCESS("50003", "unauthorised access to this natter or natter does not exist");
+  UNAUTHORISED_ACCESS("50003", "unauthorised access to this natter or natter does not exist"),
+  RECORD_NOT_FOUND("50004", "record not found");
 
 
   private final String code;
