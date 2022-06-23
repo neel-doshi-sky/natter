@@ -2,15 +2,18 @@ package com.natter.service.user;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.natter.dto.GetResponseDto;
 import com.natter.dto.ResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.enums.user.ErrorMessageUserEnum;
 import com.natter.enums.user.SuccessMessageUserEnum;
+import com.natter.model.template.UserToDisplay;
 import com.natter.model.user.User;
 import com.natter.model.user.UserFollowersFollowing;
 import com.natter.model.user.UserInfo;
@@ -18,8 +21,10 @@ import com.natter.repository.user.UserFollowersFollowingRepository;
 import com.natter.repository.user.UserInfoRepository;
 import com.natter.repository.user.UserRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -27,6 +32,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -49,15 +56,21 @@ class UserServiceTest {
   @Mock
   UserFollowersFollowingRepository userFollowersFollowingRepository;
 
+  OAuth2User
+      oAuth2User = new DefaultOAuth2User(new ArrayList<>(),
+      Map.of("sub", "115826771724477311086", "name", "Neel Doshi"), "name");
+
   @Test
-  public void whenValidId_FollowUser_ReturnSuccessMessage(){
-    Optional<UserInfo> userOptional = Optional.of( new UserInfo("1", "test", "user1", "test_user1@gmail.com"));
+  public void whenValidId_FollowUser_ReturnSuccessMessage() {
+    Optional<UserInfo> userOptional =
+        Optional.of(new UserInfo("1", "test", "user1", "test_user1@gmail.com"));
     when(userInfoRepository.findById(anyString())).thenReturn(userOptional);
     ResponseDto responseDto = userService.followOrUnfollowUserById("123", "1", true);
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(1, responseDto.getUserMessages().size()),
-        () -> assertEquals(SuccessMessageUserEnum.FOLLOWED_USER.getMessage(), responseDto.getUserMessages().get(SuccessMessageUserEnum.FOLLOWED_USER.getCode()))
+        () -> assertEquals(SuccessMessageUserEnum.FOLLOWED_USER.getMessage(),
+            responseDto.getUserMessages().get(SuccessMessageUserEnum.FOLLOWED_USER.getCode()))
     );
 
   }
@@ -146,9 +159,10 @@ class UserServiceTest {
   }
 
   @Test
-  public void whenGetFollowing_idDoesNotExist_returnError(){
+  public void whenGetFollowing_idDoesNotExist_returnError() {
     when(userRepository.findById(anyString())).thenReturn(Optional.empty());
-    ResponseListDto<UserFollowersFollowing> responseListDto = userService.getFollowingForUserId("123");
+    ResponseListDto<UserFollowersFollowing> responseListDto =
+        userService.getFollowingForUserId("123");
     assertAll(
         () -> assertNotNull(responseListDto),
         () -> assertEquals(1, responseListDto.getErrorMessages().size()),
@@ -156,5 +170,32 @@ class UserServiceTest {
     );
   }
 
+  @Test
+  public void whenGetUserById_idExists_returnSuccess() {
+    String id = "123";
+    Optional<User> user = Optional.of(new User(id));
+    when(userRepository.findById(anyString())).thenReturn(user);
+    GetResponseDto<UserToDisplay> response = userService.getUserById(oAuth2User, id);
+    assertAll(
+        () -> assertNotNull(response),
+        () -> assertNotNull(response.getResponseObject()),
+        () -> assertEquals(id, response.getResponseObject().getId()),
+        () -> assertEquals(SuccessMessageUserEnum.SUCCESS_GENERIC.getMessage(),
+            response.getUserMessages().get(SuccessMessageUserEnum.SUCCESS_GENERIC.getCode())));
 
+  }
+
+  @Test
+  public void whenGetUserById_idNotExists_returnError() {
+    String id = "123";
+    Optional<User> user = Optional.empty();
+    when(userRepository.findById(anyString())).thenReturn(user);
+    GetResponseDto<UserToDisplay> response = userService.getUserById(oAuth2User, id);
+    assertAll(
+        () -> assertNotNull(response),
+        () -> assertFalse(response.getErrorMessages().isEmpty()),
+        () -> assertEquals(ErrorMessageUserEnum.USER_NOT_FOUND.getMessage(),
+            response.getErrorMessages().get(ErrorMessageUserEnum.USER_NOT_FOUND.getCode())));
+
+  }
 }

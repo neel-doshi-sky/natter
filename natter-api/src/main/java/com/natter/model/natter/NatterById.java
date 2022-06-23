@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
 import org.springframework.data.cassandra.core.mapping.CassandraType;
 import org.springframework.data.cassandra.core.mapping.Column;
@@ -22,6 +21,11 @@ public class NatterById {
 
   public NatterById(String id) {
     this.id = id;
+  }
+
+  public NatterById(String body, String parentNatterId) {
+    this.body = body;
+    this.parentNatterId = parentNatterId;
   }
 
   @Id

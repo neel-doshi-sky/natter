@@ -7,6 +7,10 @@ import lombok.Data;
 @AllArgsConstructor
 public class UserToDisplay {
 
+  public UserToDisplay(String id) {
+    this.id = id;
+  }
+
   private String id;
 
   private String firstName;

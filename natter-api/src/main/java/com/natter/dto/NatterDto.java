@@ -6,8 +6,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.cassandra.core.mapping.CassandraType;
-import org.springframework.data.cassandra.core.mapping.Column;
 
 @Data
 @AllArgsConstructor
@@ -26,6 +24,10 @@ public class NatterDto {
     this.edited = edited;
     this.likes = likes;
     this.userLikes = userLikes;
+  }
+
+  public NatterDto(String id) {
+    this.id = id;
   }
 
   private String id;

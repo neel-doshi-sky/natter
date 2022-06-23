@@ -79,7 +79,8 @@ public class NatterService {
               getSuccessMessageForEnum(SuccessMessageNatterEnum.CREATED_NEW_NATTER));
         } catch (DatabaseErrorException e) {
           response.setErrorMessages(getErrorMessageForEnum(e.getErrorMessageNatterEnum()));
-          log.error("Error saving natter to db with body; " + natterCreateRequest + ", error: " + e);
+          log.error(
+              "Error saving natter to db with body; " + natterCreateRequest + ", error: " + e);
         }
       } else {
         response.setErrorMessages(validationResult);
@@ -172,8 +173,9 @@ public class NatterService {
    */
   public ResponseDto edit(final NatterUpdateRequest updateRequest, final @NonNull String authorId) {
     ResponseDto responseDto = new ResponseDto();
-    if(updateRequest == null){
+    if (updateRequest == null) {
       responseDto.setErrorMessages(getErrorMessageForEnum(ErrorMessageNatterEnum.NULL_BODY));
+      responseDto.setStatus(HttpStatus.BAD_REQUEST);
     } else {
       Map<String, String> validationResult =
           validationService.validateNatterUpdateBody(updateRequest);
@@ -206,36 +208,42 @@ public class NatterService {
    * @param author         the author of the comment
    * @return the CreateResponseDto containing the response of the operation
    */
-  public CreateResponseDto<NatterById> addComment(@NonNull final NatterCreateRequest commentRequest,
+  public CreateResponseDto<NatterById> addComment(final NatterCreateRequest commentRequest,
                                                   @NonNull final OAuth2User author) {
     CreateResponseDto<NatterById> responseDto = new CreateResponseDto<>();
-    if (commentRequest.getParentNatterId() == null || commentRequest.getParentNatterId().isEmpty()) {
-      responseDto.setErrorMessages(getErrorMessageForEnum(ErrorMessageNatterEnum.NULL_ID));
+    if (commentRequest == null) {
+      responseDto.setErrorMessages(getErrorMessageForEnum(ErrorMessageNatterEnum.NULL_BODY));
       responseDto.setStatus(HttpStatus.BAD_REQUEST);
     } else {
-      Optional<NatterById> natterParentOptional =
-          natterByIdRepository.findById(commentRequest.getParentNatterId());
-      if (natterParentOptional.isPresent()) {
-        try {
-          NatterById parentNatter = natterParentOptional.get();
-          NatterById comment = natterDatabaseService.addComment(commentRequest, author);
-          parentNatter.getComments().add(comment.getId());
-          natterDatabaseService.updateNatterAfterComment(parentNatter);
-          responseDto.setStatus(HttpStatus.OK);
-          responseDto.setUserMessages(
-              getSuccessMessageForEnum(SuccessMessageNatterEnum.CREATED_COMMENT));
-          responseDto.setCreated(comment);
-
-        } catch (DatabaseErrorException e) {
-          responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-          responseDto.setErrorMessages(
-              getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR));
-        }
-
-      } else {
-        responseDto.setErrorMessages(
-            getErrorMessageForEnum(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS));
+      if (commentRequest.getParentNatterId() == null ||
+          commentRequest.getParentNatterId().isEmpty()) {
+        responseDto.setErrorMessages(getErrorMessageForEnum(ErrorMessageNatterEnum.NULL_ID));
         responseDto.setStatus(HttpStatus.BAD_REQUEST);
+      } else {
+        Optional<NatterById> natterParentOptional =
+            natterByIdRepository.findById(commentRequest.getParentNatterId());
+        if (natterParentOptional.isPresent()) {
+          try {
+            NatterById parentNatter = natterParentOptional.get();
+            NatterById comment = natterDatabaseService.addComment(commentRequest, author);
+            parentNatter.getComments().add(comment.getId());
+            natterDatabaseService.updateNatterAfterComment(parentNatter);
+            responseDto.setStatus(HttpStatus.OK);
+            responseDto.setUserMessages(
+                getSuccessMessageForEnum(SuccessMessageNatterEnum.CREATED_COMMENT));
+            responseDto.setCreated(comment);
+
+          } catch (DatabaseErrorException e) {
+            responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            responseDto.setErrorMessages(
+                getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR));
+          }
+
+        } else {
+          responseDto.setErrorMessages(
+              getErrorMessageForEnum(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS));
+          responseDto.setStatus(HttpStatus.BAD_REQUEST);
+        }
       }
     }
     return responseDto;
@@ -259,12 +267,7 @@ public class NatterService {
           commentsDto = getCommentsForNatterByCommentIds(commentIds, authId);
         }
         response.setResponseObject(
-            new NatterDto(natterById.getId(), natterById.getBody(), natterById.getParentNatterId(),
-                natterById.getDateCreated(), natterById.getDateUpdated(), natterById.getAuthorId(),
-                natterById.getAuthorName(), commentsDto,
-                Objects.equals(authId, natterById.getAuthorId()),
-                natterById.getDateUpdated().isAfter(natterById.getDateCreated()),
-                natterById.getLikes().size(), natterById.getLikes()));
+            getResponseObjectForGetNatterById(natterById, authId, commentsDto));
         response.setStatus(HttpStatus.OK);
         response.setUserMessages(
             getSuccessMessageForEnum(SuccessMessageNatterEnum.FETCHED_NATTER_BY_ID));
@@ -282,6 +285,25 @@ public class NatterService {
     }
 
     return response;
+  }
+
+  /**
+   * Method to generate the response object (Natter DTO) for get natter by id
+   *
+   * @param natterById  the natter by id object from the database
+   * @param authId      the id of the author
+   * @param commentsDto the list of comments
+   * @return the response object as a Natter DTO
+   */
+  private NatterDto getResponseObjectForGetNatterById(@NonNull final NatterById natterById,
+                                                      @NonNull final String authId,
+                                                      final List<NatterDto> commentsDto) {
+    return new NatterDto(natterById.getId(), natterById.getBody(), natterById.getParentNatterId(),
+        natterById.getDateCreated(), natterById.getDateUpdated(), natterById.getAuthorId(),
+        natterById.getAuthorName(), commentsDto,
+        Objects.equals(authId, natterById.getAuthorId()),
+        natterById.getDateUpdated().isAfter(natterById.getDateCreated()),
+        natterById.getLikes().size(), natterById.getLikes());
   }
 
   /**
@@ -327,7 +349,7 @@ public class NatterService {
       try {
         boolean isLike = false;
         NatterById natterById = natterByIdRepository.findById(natterId).orElseThrow();
-        if(natterById.getLikes() == null){
+        if (natterById.getLikes() == null) {
           natterById.setLikes(new ArrayList<>());
         }
         if (!natterById.getLikes().contains(authId)) {
@@ -372,7 +394,7 @@ public class NatterService {
    * @param authId the authenticated user
    * @return the Response List DTO containing list of natters
    */
-  public ResponseListDto<NatterByAuthor> getNattersForFollowing(@NonNull final String authId) {
+  public ResponseListDto<NatterByAuthor> getNatterFeed(@NonNull final String authId) {
     //TODO - Paginate the response
     ResponseListDto<NatterByAuthor> natterListResponseDto = new ResponseListDto<>();
     List<NatterByAuthor> natterByAuthorList;

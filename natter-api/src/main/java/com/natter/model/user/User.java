@@ -13,12 +13,16 @@ import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
-@Table(value="user")
+@Table(value = "user")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
+
+  public User(String id) {
+    this.id = id;
+  }
 
   @Id
   @PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)

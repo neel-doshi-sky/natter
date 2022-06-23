@@ -4,15 +4,11 @@ import com.natter.dto.GetResponseDto;
 import com.natter.dto.ResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.model.template.UserToDisplay;
-import com.natter.model.user.User;
 import com.natter.model.user.UserFollowersFollowing;
-import com.natter.repository.user.UserRepository;
 import com.natter.service.AuthService;
 import com.natter.service.user.UserService;
-import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -32,7 +28,6 @@ public class UserController {
 
   private final UserService userService;
   private final AuthService authService;
-  private final UserRepository userRepository;
 
   /**
    * Endpoint to follow a user by id
@@ -89,7 +84,7 @@ public class UserController {
    * @param id        the id of the user
    * @return the response entity result
    */
-  @GetMapping(value = {"/following/{id}", "/followers"})
+  @GetMapping(value = {"/following/{id}", "/following"})
   public ResponseEntity<ResponseListDto<UserFollowersFollowing>> getFollowingForUserId(
       @AuthenticationPrincipal OAuth2User principal,
       @PathVariable(value = "id", required = false) String id) {
@@ -101,29 +96,20 @@ public class UserController {
   }
 
   /**
-   * Endpoint to get the authenticated user details
+   * Endpoint to get a user by id
    *
    * @param principal the authenticated user
+   * @param id        the id of the user to fetch
    * @return the response entity
    */
   @GetMapping(value = {"/{id}", "/"})
-  public ResponseEntity<GetResponseDto<UserToDisplay>> getAuthenticatedUser(
+  public ResponseEntity<GetResponseDto<UserToDisplay>> getUserById(
       @AuthenticationPrincipal OAuth2User principal, @PathVariable(required = false) String id) {
-    if(id == null || id.isEmpty()){
+    if (id == null || id.isEmpty()) {
       id = authService.getUserIdFromAuth(principal);
     }
-    User user = userRepository.findById(id).orElseThrow();
-    if(user.getFollowers() == null){
-      user.setFollowers(new HashSet<>());
-    }
-    if(user.getFollowing() == null) {
-      user.setFollowing(new HashSet<>());
-    }
-    UserToDisplay userToDisplay = new UserToDisplay(user.getId(), user.getFirstName(), user.getLastName(),
-        "Followers: " + (user.getFollowers() != null ? user.getFollowers().size() : "0"),
-        "Following: " + (user.getFollowing() != null ? user.getFollowing().size() : 0),
-        user.getEmail(), user.getId().equals(principal.getName()), user.getFollowers().contains(principal.getName()), user.getFollowing().contains(principal.getName()));
-    return new ResponseEntity<>(new GetResponseDto<>(userToDisplay), HttpStatus.OK);
+    GetResponseDto<UserToDisplay> responseDto = userService.getUserById(principal, id);
+    return new ResponseEntity<>(responseDto, responseDto.getStatus());
   }
 
 }

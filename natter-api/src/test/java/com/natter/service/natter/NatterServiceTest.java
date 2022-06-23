@@ -460,7 +460,7 @@ class  NatterServiceTest {
     userIds.add("3");
     when(userService.getFollowingIdsForUser(any())).thenReturn(userIds);
     when( natterDatabaseService.getAllNattersForFollowing(any())).thenReturn(nattersToReturn);
-    ResponseListDto<NatterByAuthor> responseDto = natterService.getNattersForFollowing("123");
+    ResponseListDto<NatterByAuthor> responseDto = natterService.getNatterFeed("123");
     assertAll(
         () -> assertNotNull(responseDto),
         () -> assertEquals(nattersToReturn.size(), responseDto.getList().size()),

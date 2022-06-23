@@ -1,15 +1,18 @@
 package com.natter.service.user;
 
+import com.natter.dto.GetResponseDto;
 import com.natter.dto.ResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.enums.user.ErrorMessageUserEnum;
 import com.natter.enums.user.SuccessMessageUserEnum;
+import com.natter.model.template.UserToDisplay;
 import com.natter.model.user.User;
 import com.natter.model.user.UserFollowersFollowing;
 import com.natter.model.user.UserInfo;
 import com.natter.repository.user.UserFollowersFollowingRepository;
 import com.natter.repository.user.UserInfoRepository;
 import com.natter.repository.user.UserRepository;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -18,6 +21,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -66,7 +70,9 @@ public class UserService {
 
       }
     } catch (NoSuchElementException e) {
-      log.error("unable to find user info record for user id: " + userIdToFollowOrUnfollow + ", error: " + e.getMessage());
+      log.error(
+          "unable to find user info record for user id: " + userIdToFollowOrUnfollow + ", error: " +
+              e.getMessage());
       response.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_NOT_FOUND.getCode(),
           ErrorMessageUserEnum.USER_NOT_FOUND.getMessage()));
       response.setStatus(HttpStatus.NOT_FOUND);
@@ -140,5 +146,46 @@ public class UserService {
    */
   public List<String> getFollowingIdsForUser(@NonNull final String authId) {
     return userDatabaseService.getFollowingForUser(authId);
+  }
+
+  /**
+   * Method to get a user by id
+   *
+   * @param principal the authenticated user
+   * @param id        the id of the user
+   * @return the GetResponseDto containing the result of the operation
+   */
+  public GetResponseDto<UserToDisplay> getUserById(@NonNull final OAuth2User principal,
+                                                   @NonNull final String id) {
+    GetResponseDto<UserToDisplay> responseDto = new GetResponseDto<>();
+    try {
+      User user = userRepository.findById(id).orElseThrow();
+      if (user.getFollowers() == null) {
+        user.setFollowers(new HashSet<>());
+      }
+      if (user.getFollowing() == null) {
+        user.setFollowing(new HashSet<>());
+      }
+      UserToDisplay userToDisplay =
+          new UserToDisplay(user.getId(), user.getFirstName(), user.getLastName(),
+              "Followers: " + (user.getFollowers() != null ? user.getFollowers().size() : "0"),
+              "Following: " + (user.getFollowing() != null ? user.getFollowing().size() : 0),
+              user.getEmail(), user.getId().equals(principal.getName()),
+              user.getFollowers().contains(principal.getName()),
+              user.getFollowing().contains(principal.getName()));
+
+      responseDto.setResponseObject(userToDisplay);
+      responseDto.setStatus(HttpStatus.OK);
+      responseDto.setUserMessages(Map.of(SuccessMessageUserEnum.SUCCESS_GENERIC.getCode(),
+          SuccessMessageUserEnum.SUCCESS_GENERIC.getMessage()));
+
+    } catch (NoSuchElementException e) {
+      log.error("error fetching user by id with error: " + e);
+      responseDto.setStatus(HttpStatus.NOT_FOUND);
+      responseDto.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_NOT_FOUND.getCode(),
+          ErrorMessageUserEnum.USER_NOT_FOUND.getMessage()));
+    }
+    return responseDto;
+
   }
 }

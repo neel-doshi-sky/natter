@@ -189,12 +189,12 @@ public class NatterController {
    * @return list of natters for feed
    */
   @GetMapping(value = "/feed")
-  public ResponseEntity<ResponseListDto<NatterByAuthor>> listNattersForFollowing(
+  public ResponseEntity<ResponseListDto<NatterByAuthor>> getNatterFeed(
       @AuthenticationPrincipal OAuth2User principal) {
 
     ResponseListDto<NatterByAuthor> natterListResponse =
-        natterService.getNattersForFollowing(authService.getUserIdFromAuth(principal));
-    return new ResponseEntity<>(natterListResponse, HttpStatus.OK);
+        natterService.getNatterFeed(authService.getUserIdFromAuth(principal));
+    return new ResponseEntity<>(natterListResponse, natterListResponse.getStatus());
 
   }
 }
