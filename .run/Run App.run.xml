@@ -3,10 +3,18 @@
     <option name="MAIN_CLASS_NAME" value="com.natter.NatterApplication" />
     <module name="natter.natter-api.main" />
     <extension name="coverage">
-      <pattern>
-        <option name="PATTERN" value="com.natter.controller.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
+        <pattern>
+            <option name="PATTERN" value="com.natter.controller.*"/>
+            <option name="ENABLED" value="true"/>
+        </pattern>
+        <pattern>
+            <option name="PATTERN" value="com.natter.service.natter.*"/>
+            <option name="ENABLED" value="true"/>
+        </pattern>
+        <pattern>
+            <option name="PATTERN" value="com.natter.service.user.*"/>
+            <option name="ENABLED" value="true"/>
+        </pattern>
     </extension>
     <method v="2">
       <option name="Make" enabled="true" />
