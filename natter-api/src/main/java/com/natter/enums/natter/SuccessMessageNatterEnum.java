@@ -14,7 +14,8 @@ public enum SuccessMessageNatterEnum {
   CREATED_COMMENT("10004", "Successfully added comment"),
   FETCHED_NATTER_BY_ID("10005", "Successfully fetched natter by id"),
   FETCHED_All_NATTERS("10006", "Successfully fetched all natters"),
-  REACT_SUCCESS("10007", "Successfully reacted to natter");
+  LIKE_SUCCESS("10007", "Successfully liked natter"),
+  UNLIKE_SUCCESS("10007", "Successfully unliked natter");
 
   private final String code;
   private final String message;

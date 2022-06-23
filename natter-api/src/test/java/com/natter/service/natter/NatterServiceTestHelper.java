@@ -4,6 +4,7 @@ import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.model.natter.NatterById;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,9 +48,26 @@ public class NatterServiceTestHelper {
     valid.setDateCreated(LocalDateTime.now());
     valid.setDateUpdated(valid.getDateCreated());
     valid.setComments(List.of("123, 234"));
+    valid.setLikes(null);
     return valid;
   }
-  public NatterById getValidNatterByIdWithoutComments(){
+
+  public NatterById getValidNatterByIdWithCommentsAndLikedByAuthId(String authId) {
+    NatterById valid = new NatterById();
+    List<String> likeList = new ArrayList<>();
+    likeList.add(authId);
+    valid.setParentNatterId("");
+    valid.setAuthorId("testUserId");
+    valid.setBody("This is a natter!");
+    valid.setId("12323");
+    valid.setDateCreated(LocalDateTime.now());
+    valid.setDateUpdated(valid.getDateCreated());
+    valid.setComments(List.of("123, 234"));
+    valid.setLikes(likeList);
+    return valid;
+  }
+
+  public NatterById getValidNatterByIdWithoutComments() {
     NatterById valid = new NatterById();
     valid.setParentNatterId("");
     valid.setAuthorId("testUserId");

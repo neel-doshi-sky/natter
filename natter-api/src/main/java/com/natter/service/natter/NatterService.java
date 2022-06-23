@@ -236,7 +236,7 @@ public class NatterService {
           } catch (DatabaseErrorException e) {
             responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             responseDto.setErrorMessages(
-                getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR));
+                getErrorMessageForEnum(e.getErrorMessageNatterEnum()));
           }
 
         } else {
@@ -303,7 +303,7 @@ public class NatterService {
         natterById.getAuthorName(), commentsDto,
         Objects.equals(authId, natterById.getAuthorId()),
         natterById.getDateUpdated().isAfter(natterById.getDateCreated()),
-        natterById.getLikes().size(), natterById.getLikes());
+        natterById.getLikes() != null ? natterById.getLikes().size() : 0, natterById.getLikes());
   }
 
   /**
@@ -372,7 +372,8 @@ public class NatterService {
         natterByAuthor.setLikes(natterByAuthor.getUserLikes().size());
         natterByAuthorRepository.save(natterByAuthor);
         responseDto.setUserMessages(
-            getSuccessMessageForEnum(SuccessMessageNatterEnum.REACT_SUCCESS));
+            getSuccessMessageForEnum(isLike ? SuccessMessageNatterEnum.LIKE_SUCCESS :
+                SuccessMessageNatterEnum.UNLIKE_SUCCESS));
         responseDto.setStatus(HttpStatus.OK);
       } catch (NoSuchElementException e) {
         log.error("error liking natter with id: " + natterId + ", error: " + e);
