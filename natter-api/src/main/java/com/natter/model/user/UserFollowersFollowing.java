@@ -15,6 +15,12 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @NoArgsConstructor
 public class UserFollowersFollowing {
 
+  public UserFollowersFollowing(String id, int followers, int following) {
+    this.id = id;
+    this.followers = followers;
+    this.following = following;
+  }
+
   @Id
   @PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
   private String id;

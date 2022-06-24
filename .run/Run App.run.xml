@@ -8,11 +8,11 @@
             <option name="ENABLED" value="true"/>
         </pattern>
         <pattern>
-            <option name="PATTERN" value="com.natter.service.natter.*"/>
+            <option name="PATTERN" value="com.natter.dao.*"/>
             <option name="ENABLED" value="true"/>
         </pattern>
         <pattern>
-            <option name="PATTERN" value="com.natter.service.user.*"/>
+            <option name="PATTERN" value="com.natter.dao.*"/>
             <option name="ENABLED" value="true"/>
         </pattern>
     </extension>

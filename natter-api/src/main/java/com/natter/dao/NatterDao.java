@@ -1,4 +1,4 @@
-package com.natter.service.natter;
+package com.natter.dao;
 
 import com.datastax.oss.driver.api.core.AllNodesFailedException;
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -36,7 +36,7 @@ import org.thymeleaf.util.StringUtils;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class NatterDatabaseService {
+public class NatterDao {
   private final NatterByIdRepository natterByIdRepository;
   private final NatterByAuthorRepository natterByAuthorRepository;
 
@@ -73,12 +73,21 @@ public class NatterDatabaseService {
     natterByAuthor.setParentNatterId(natterCreateRequest.getParentNatterId() == null ? "" :
         natterCreateRequest.getParentNatterId());
 
-    NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
-    if (natterByAuthorCreated.getId() == null) {
-      log.error(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + id + " , natterRequestBody: " +
+    try {
+      NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
+      if (natterByAuthorCreated.getId() == null) {
+        log.error(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + id +
+            " , natterRequestBody: " +
+            natterCreateRequest);
+        throw new DatabaseErrorException(
+            "unable to create natter by id for natter request: " + natterCreateRequest);
+      }
+    } catch (IllegalArgumentException e) {
+      log.error("error creating natterby id with exception: " + e + " for natter body: " +
           natterCreateRequest);
-      throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
+      throw new DatabaseErrorException(e.getMessage());
     }
+
 
     NatterById natterById = new NatterById();
     natterById.setId(id);
@@ -89,13 +98,22 @@ public class NatterDatabaseService {
     natterById.setAuthorName(author.getAttribute("name"));
     natterById.setParentNatterId(natterCreateRequest.getParentNatterId() == null ? "" :
         natterCreateRequest.getParentNatterId());
-    NatterById createdNatter = natterByIdRepository.save(natterById);
-    if (createdNatter.getId() == null) {
-      log.error(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + id + " , natterRequestBody: " +
-          natterCreateRequest);
-      throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
+    try {
+      NatterById createdNatter = natterByIdRepository.save(natterById);
+      if (createdNatter.getId() == null) {
+        log.error(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + id +
+            " , natterRequestBody: " +
+            natterCreateRequest);
+        throw new DatabaseErrorException(
+            "unable to create natter by author for natter request: " + natterCreateRequest);
+      }
+      return createdNatter;
+    } catch (IllegalArgumentException e) {
+      log.error("error creating natter by author for natter request: " + natterCreateRequest +
+          " with error: " + e);
+      throw new DatabaseErrorException(e.getMessage());
     }
-    return createdNatter;
+
   }
 
   public void updateNatterAfterComment(@NonNull final NatterById natter) throws DatabaseErrorException {
@@ -114,13 +132,29 @@ public class NatterDatabaseService {
     natterByAuthor.setAuthorName(natter.getAuthorName());
     natterByAuthor.setParentNatterId(natter.getParentNatterId());
 
-    NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
-    if (natterByAuthorCreated.getId() == null) {
-      log.error(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + natter.getId() + " , natter: " +
-          natter);
-      throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
+    try {
+      NatterByAuthor natterByAuthorCreated = natterByAuthorRepository.save(natterByAuthor);
+      if (natterByAuthorCreated.getId() == null) {
+        log.error(
+            ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + natter.getId() +
+                " , natter: " +
+                natter);
+        throw new DatabaseErrorException(
+            "error updating natter by author after comment for natter: " + natter);
+      }
+      NatterById natterById = natterByIdRepository.save(natter);
+      if (natterById.getId() == null) {
+        log.error(
+            ErrorMessageNatterEnum.DATABASE_ERROR.getMessage() + " natter id: " + natter.getId() +
+                " , natter: " +
+                natter);
+        throw new DatabaseErrorException(
+            "error updating natter by id after comment for natter: " + natter);
+      }
+    } catch (IllegalArgumentException e) {
+      log.error("error updating natter after comment for natter: " + natter + " with error: " + e);
+      throw new DatabaseErrorException(e.getMessage());
     }
-    natterByIdRepository.save(natter);
 
   }
 
@@ -129,23 +163,32 @@ public class NatterDatabaseService {
    *
    * @param natterById the id to delete
    */
-  public void delete(@NonNull final NatterById natterById) {
+  public boolean delete(@NonNull final NatterById natterById) throws DatabaseErrorException {
     NatterByAuthorPrimaryKey key =
         new NatterByAuthorPrimaryKey(natterById.getAuthorId(), natterById.getId());
     if (!natterById.getParentNatterId().isEmpty()) {
       deleteCommentAndUpdateCommentCount(natterById);
     }
-    natterByIdRepository.deleteById(natterById.getId());
-    if (!natterById.getComments().isEmpty()) {
-      List<NatterById> commentsList = natterByIdRepository.findAllById(natterById.getComments());
-      natterByIdRepository.deleteAllById(natterById.getComments());
-      List<NatterByAuthorPrimaryKey> commentsToDelete = new ArrayList<>();
-      for (NatterById comment : commentsList) {
-        commentsToDelete.add(new NatterByAuthorPrimaryKey(comment.getAuthorId(), comment.getId()));
+    try {
+      natterByIdRepository.deleteById(natterById.getId());
+      if (!natterById.getComments().isEmpty()) {
+        List<NatterById> commentsList = natterByIdRepository.findAllById(natterById.getComments());
+        natterByIdRepository.deleteAllById(natterById.getComments());
+        List<NatterByAuthorPrimaryKey> commentsToDelete = new ArrayList<>();
+        for (NatterById comment : commentsList) {
+          commentsToDelete.add(
+              new NatterByAuthorPrimaryKey(comment.getAuthorId(), comment.getId()));
+        }
+        natterByAuthorRepository.deleteAllById(commentsToDelete);
       }
-      natterByAuthorRepository.deleteAllById(commentsToDelete);
+      natterByAuthorRepository.deleteById(key);
+
+      return true;
+
+    } catch (IllegalArgumentException e) {
+      log.error("error deleting natter with id: " + natterById.getId() + " with error: " + e);
+      throw new DatabaseErrorException(e.getMessage());
     }
-    natterByAuthorRepository.deleteById(key);
   }
 
   /**
@@ -172,9 +215,11 @@ public class NatterDatabaseService {
    *
    * @param natterById the natter by id to delete
    */
-  private void deleteCommentAndUpdateCommentCount(@NonNull final NatterById natterById) {
+  private void deleteCommentAndUpdateCommentCount(@NonNull final NatterById natterById)
+      throws DatabaseErrorException {
     try {
-      NatterById parent = natterByIdRepository.findById(natterById.getParentNatterId()).orElseThrow();
+      NatterById parent =
+          natterByIdRepository.findById(natterById.getParentNatterId()).orElseThrow();
       if (parent.getComments() != null && parent.getComments().contains(natterById.getId())) {
         parent.getComments().remove(natterById.getId());
         natterByIdRepository.save(parent);
@@ -184,8 +229,12 @@ public class NatterDatabaseService {
               parent.getId())).orElseThrow();
       parentByAuthor.setCommentCount(parentByAuthor.getCommentCount() - 1);
       natterByAuthorRepository.save(parentByAuthor);
-    } catch (NoSuchElementException e){
+    } catch (NoSuchElementException e) {
       log.error("Unable to find comment with id :" + natterById.getId() + ", error: " + e);
+    } catch (IllegalArgumentException e) {
+      log.error(
+          "Error saving natter after delete comment and update comment count with exception: " + e);
+      throw new DatabaseErrorException(e.getMessage());
     }
   }
 
@@ -212,7 +261,7 @@ public class NatterDatabaseService {
 
     } catch (AllNodesFailedException | QueryExecutionException | QueryValidationException e) {
       log.error("error getting natters for following with message: " + e);
-      throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
+      throw new DatabaseErrorException(e.getMessage());
     }
 
     return natterByAuthorList;

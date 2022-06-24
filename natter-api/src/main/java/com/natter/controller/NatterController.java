@@ -5,6 +5,7 @@ import com.natter.dto.GetResponseDto;
 import com.natter.dto.NatterDto;
 import com.natter.dto.ResponseDto;
 import com.natter.dto.ResponseListDto;
+import com.natter.enums.natter.ErrorMessageNatterEnum;
 import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
 import com.natter.model.natter.NatterById;
@@ -176,7 +177,8 @@ public class NatterController {
 
     } catch (DatabaseErrorException e) {
       return new ResponseEntity<>(
-          new ResponseDto(natterService.getErrorMessageForEnum(e.getErrorMessageNatterEnum()),
+          new ResponseDto(
+              natterService.getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR),
               new HashMap<>(), HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

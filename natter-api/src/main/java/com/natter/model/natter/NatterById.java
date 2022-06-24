@@ -28,6 +28,12 @@ public class NatterById {
     this.parentNatterId = parentNatterId;
   }
 
+  public NatterById(String id, String parentNatterId, String authorId) {
+    this.id = id;
+    this.parentNatterId = parentNatterId;
+    this.authorId = authorId;
+  }
+
   @Id
   @PrimaryKeyColumn(name = "id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
   @CassandraType(type = CassandraType.Name.TEXT)

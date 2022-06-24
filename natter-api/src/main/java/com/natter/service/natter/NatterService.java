@@ -1,6 +1,7 @@
 package com.natter.service.natter;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.natter.dao.NatterDao;
 import com.natter.dto.CreateResponseDto;
 import com.natter.dto.GetResponseDto;
 import com.natter.dto.NatterDto;
@@ -44,7 +45,7 @@ public class NatterService {
   private final NatterValidationService validationService;
   private final NatterByAuthorRepository natterByAuthorRepository;
   private final NatterByIdRepository natterByIdRepository;
-  private final NatterDatabaseService natterDatabaseService;
+  private final NatterDao natterDao;
 
   private final MessageUtil messageUtil = new MessageUtil();
 
@@ -72,13 +73,13 @@ public class NatterService {
 
         try {
           NatterById created =
-              natterDatabaseService.create(timeId.toString(), natterCreateRequest, author);
+              natterDao.create(timeId.toString(), natterCreateRequest, author);
           response.setCreated(created);
           response.setStatus(HttpStatus.OK);
           response.setUserMessages(
               getSuccessMessageForEnum(SuccessMessageNatterEnum.CREATED_NEW_NATTER));
         } catch (DatabaseErrorException e) {
-          response.setErrorMessages(getErrorMessageForEnum(e.getErrorMessageNatterEnum()));
+          response.setErrorMessages(getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR));
           log.error(
               "Error saving natter to db with body; " + natterCreateRequest + ", error: " + e);
         }
@@ -110,10 +111,16 @@ public class NatterService {
       Optional<NatterById> foundById = natterByIdRepository.findById(idToDelete);
       if (foundById.isPresent()) {
         if (foundById.get().getAuthorId().equals(authorId)) {
-          natterDatabaseService.delete(foundById.get());
-          response.setStatus(HttpStatus.OK);
-          response.setUserMessages(
-              getSuccessMessageForEnum(SuccessMessageNatterEnum.DELETED_NATTER));
+          try {
+            natterDao.delete(foundById.get());
+            response.setStatus(HttpStatus.OK);
+            response.setUserMessages(
+                getSuccessMessageForEnum(SuccessMessageNatterEnum.DELETED_NATTER));
+          } catch (DatabaseErrorException e) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setErrorMessages(
+                getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR));
+          }
         } else {
           response.setErrorMessages(
               getErrorMessageForEnum(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS));
@@ -183,7 +190,7 @@ public class NatterService {
         Optional<NatterByAuthor> natterByAuthorOptional = natterByAuthorRepository.findById(
             new NatterByAuthorPrimaryKey(authorId, updateRequest.getId()));
         if (natterByAuthorOptional.isPresent()) {
-          natterDatabaseService.update(updateRequest, authorId);
+          natterDao.update(updateRequest, authorId);
           responseDto.setUserMessages(
               getSuccessMessageForEnum(SuccessMessageNatterEnum.UPDATED_NATTER));
           responseDto.setStatus(HttpStatus.OK);
@@ -225,9 +232,9 @@ public class NatterService {
         if (natterParentOptional.isPresent()) {
           try {
             NatterById parentNatter = natterParentOptional.get();
-            NatterById comment = natterDatabaseService.addComment(commentRequest, author);
+            NatterById comment = natterDao.addComment(commentRequest, author);
             parentNatter.getComments().add(comment.getId());
-            natterDatabaseService.updateNatterAfterComment(parentNatter);
+            natterDao.updateNatterAfterComment(parentNatter);
             responseDto.setStatus(HttpStatus.OK);
             responseDto.setUserMessages(
                 getSuccessMessageForEnum(SuccessMessageNatterEnum.CREATED_COMMENT));
@@ -236,7 +243,7 @@ public class NatterService {
           } catch (DatabaseErrorException e) {
             responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             responseDto.setErrorMessages(
-                getErrorMessageForEnum(e.getErrorMessageNatterEnum()));
+                getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR));
           }
 
         } else {
@@ -382,7 +389,7 @@ public class NatterService {
             getErrorMessageForEnum(ErrorMessageNatterEnum.UNAUTHORISED_ACCESS));
       } catch (IllegalArgumentException e) {
         log.error("error liking natter with id: " + natterId + ", error: " + e);
-        throw new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR);
+        throw new DatabaseErrorException(e.getMessage());
       }
 
     }
@@ -405,7 +412,7 @@ public class NatterService {
 
     try {
       natterByAuthorList =
-          natterDatabaseService.getAllNattersForFollowing(Set.copyOf(followingList));
+          natterDao.getAllNattersForFollowing(Set.copyOf(followingList));
       natterListResponseDto.setList(sortByDateUpdated(natterByAuthorList));
       natterListResponseDto.setStatus(HttpStatus.OK);
       natterListResponseDto.setUserMessages(
@@ -414,7 +421,8 @@ public class NatterService {
     } catch (DatabaseErrorException e) {
       log.error("error getting natters for following for auth id: " + authId + ", error: " + e);
       natterListResponseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-      natterListResponseDto.setErrorMessages(getErrorMessageForEnum(e.getErrorMessageNatterEnum()));
+      natterListResponseDto.setErrorMessages(
+          getErrorMessageForEnum(ErrorMessageNatterEnum.DATABASE_ERROR));
     }
 
     return natterListResponseDto;

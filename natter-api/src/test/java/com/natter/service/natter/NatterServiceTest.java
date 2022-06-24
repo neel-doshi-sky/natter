@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.natter.dao.NatterDao;
 import com.natter.dto.CreateResponseDto;
 import com.natter.dto.GetResponseDto;
 import com.natter.dto.NatterDto;
@@ -49,7 +50,7 @@ class NatterServiceTest {
   NatterService natterService;
 
   @Mock
-  NatterDatabaseService natterDatabaseService;
+  NatterDao natterDao;
 
   @Mock
   NatterByAuthorRepository natterByAuthorRepository;
@@ -97,7 +98,7 @@ class NatterServiceTest {
     createdNatterById.setDateUpdated(createdNatterById.getDateCreated());
 
     when(natterValidationService.validateNatterCreateBody(any())).thenReturn(new HashMap<>());
-    when(natterDatabaseService.create(any(), any(), any())).thenReturn(createdNatterById);
+    when(natterDao.create(any(), any(), any())).thenReturn(createdNatterById);
 
     CreateResponseDto<NatterById> response = natterService.create(natterRequest, oAuth2User);
 
@@ -153,8 +154,8 @@ class NatterServiceTest {
 
   @Test
   public void whenDatabaseErrorInCreate_returnDatabaseError() throws DatabaseErrorException {
-    when(natterDatabaseService.create(any(), any(), any())).thenThrow(
-        new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR));
+    when(natterDao.create(any(), any(), any())).thenThrow(
+        new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage()));
     CreateResponseDto<NatterById> natterCreateResponseDto =
         natterService.create(new NatterCreateRequest(), oAuth2User);
     assertAll(
@@ -169,7 +170,7 @@ class NatterServiceTest {
   }
 
   @Test
-  public void whenDeleteValidId_DeleteNatter_ReturnSuccessMessage() {
+  public void whenDeleteValidId_DeleteNatter_ReturnSuccessMessage() throws DatabaseErrorException {
     NatterById natter = new NatterById();
     natter.setAuthorId("123");
     Optional<NatterById> optional = Optional.of(natter);
@@ -183,7 +184,7 @@ class NatterServiceTest {
             SuccessMessageNatterEnum.DELETED_NATTER.getMessage(), responseDto.getUserMessages().get(
                 SuccessMessageNatterEnum.DELETED_NATTER.getCode()))
     );
-    verify(natterDatabaseService, times(1)).delete(natter);
+    verify(natterDao, times(1)).delete(natter);
 
   }
 
@@ -230,6 +231,23 @@ class NatterServiceTest {
         () -> assertEquals(ErrorMessageNatterEnum.RECORD_NOT_FOUND.getMessage(),
             responseDto.getErrorMessages().get(
                 ErrorMessageNatterEnum.RECORD_NOT_FOUND.getCode()))
+    );
+  }
+
+  @Test
+  public void whenDelete_databaseErrorOccurs_returnDatabaseError() throws DatabaseErrorException {
+    Optional<NatterById> optional = Optional.of(new NatterById("123", null, "123"));
+    when(natterByIdRepository.findById(any())).thenReturn(optional);
+    when(natterDao.delete(any())).thenThrow(
+        new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage()));
+    ResponseDto responseDto = natterService.delete("123", "123");
+    assertAll(
+        () -> assertNotNull(responseDto),
+        () -> assertNotNull(responseDto.getErrorMessages()),
+        () -> assertEquals(1, responseDto.getErrorMessages().size()),
+        () -> assertEquals(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage(),
+            responseDto.getErrorMessages().get(
+                ErrorMessageNatterEnum.DATABASE_ERROR.getCode()))
     );
   }
 
@@ -393,7 +411,7 @@ class NatterServiceTest {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", "23");
     when(natterByIdRepository.findById(natterCreateRequest.getParentNatterId())).thenReturn(
         Optional.of(new NatterById("23")));
-    when(natterDatabaseService.addComment(natterCreateRequest, oAuth2User)).thenReturn(
+    when(natterDao.addComment(natterCreateRequest, oAuth2User)).thenReturn(
         new NatterById());
     CreateResponseDto<NatterById> responseDto =
         natterService.addComment(natterCreateRequest, oAuth2User);
@@ -411,8 +429,8 @@ class NatterServiceTest {
     NatterCreateRequest natterCreateRequest = new NatterCreateRequest("Nice!", "23");
     when(natterByIdRepository.findById(natterCreateRequest.getParentNatterId())).thenReturn(
         Optional.of(new NatterById("23")));
-    when(natterDatabaseService.addComment(any(), any())).thenThrow(
-        new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR));
+    when(natterDao.addComment(any(), any())).thenThrow(
+        new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage()));
     CreateResponseDto<NatterById> responseDto =
         natterService.addComment(natterCreateRequest, oAuth2User);
     assertAll(
@@ -559,8 +577,7 @@ class NatterServiceTest {
   }
 
   @Test
-  public void whenLikeNatter_natterIdIsValid_databaseErrorOccurs_throwDatabaseErrorException()
-      throws DatabaseErrorException {
+  public void whenLikeNatter_natterIdIsValid_databaseErrorOccurs_throwDatabaseErrorException() {
     NatterById natter =
         natterServiceTestHelper.getValidNatterByIdWithCommentsAndLikedByAuthId("123");
     when(natterByIdRepository.findById(any())).thenReturn(Optional.of(natter));
@@ -579,7 +596,7 @@ class NatterServiceTest {
     userIds.add("2");
     userIds.add("3");
     when(userService.getFollowingIdsForUser(any())).thenReturn(userIds);
-    when(natterDatabaseService.getAllNattersForFollowing(any())).thenReturn(nattersToReturn);
+    when(natterDao.getAllNattersForFollowing(any())).thenReturn(nattersToReturn);
     ResponseListDto<NatterByAuthor> responseDto = natterService.getNatterFeed("123");
     assertAll(
         () -> assertNotNull(responseDto),
@@ -599,8 +616,8 @@ class NatterServiceTest {
     userIds.add("2");
     userIds.add("3");
     when(userService.getFollowingIdsForUser(any())).thenReturn(userIds);
-    when(natterDatabaseService.getAllNattersForFollowing(any())).thenThrow(
-        new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR));
+    when(natterDao.getAllNattersForFollowing(any())).thenThrow(
+        new DatabaseErrorException(ErrorMessageNatterEnum.DATABASE_ERROR.getMessage()));
     ResponseListDto<NatterByAuthor> responseDto = natterService.getNatterFeed("123");
     assertAll(
         () -> assertNotNull(responseDto),

@@ -37,8 +37,8 @@ public class NatterValidationService {
     Map<String, String> validationResults = new HashMap<>();
     validationResults.putAll(
         validateStringField(updateRequest.getBody(), NatterRequiredFieldsEnum.BODY));
-    validationResults.putAll(validateStringField(updateRequest.getId(),
-        NatterRequiredFieldsEnum.ID));
+    validationResults.putAll(
+        validateStringField(updateRequest.getId(), NatterRequiredFieldsEnum.ID));
 
 
     return validationResults;

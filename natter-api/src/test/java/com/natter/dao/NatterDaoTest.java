@@ -1,4 +1,4 @@
-package com.natter.service.natter;
+package com.natter.dao;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,9 +11,9 @@ import static org.mockito.Mockito.when;
 
 import com.natter.exception.DatabaseErrorException;
 import com.natter.model.natter.NatterByAuthor;
+import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.model.natter.NatterById;
 import com.natter.model.natter.NatterCreateRequest;
-import com.natter.model.natter.NatterByAuthorPrimaryKey;
 import com.natter.repository.natter.NatterByAuthorRepository;
 import com.natter.repository.natter.NatterByIdRepository;
 import java.time.LocalDateTime;
@@ -24,15 +24,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @ExtendWith(MockitoExtension.class)
-class NatterDatabaseServiceTest {
+class NatterDaoTest {
 
   @InjectMocks
-  NatterDatabaseService natterDatabaseService;
+  NatterDao natterDao;
 
   @Mock
   NatterByAuthorRepository natterByAuthorRepository;
@@ -64,7 +63,7 @@ class NatterDatabaseServiceTest {
 
     when(natterByAuthorRepository.save(any())).thenReturn(natterByAuthor);
     when(natterByIdRepository.save(any())).thenReturn(createdNatterById);
-    NatterById result = natterDatabaseService.create("123", new NatterCreateRequest(), oAuth2User);
+    NatterById result = natterDao.create("123", new NatterCreateRequest(), oAuth2User);
     assertAll(
         () -> assertNotNull(result),
         () -> assertEquals(createdNatterById.getId(), result.getId())
@@ -78,14 +77,16 @@ class NatterDatabaseServiceTest {
   public void throwException_whenSaveToAuthorTableReturnsNoId(){
     NatterByAuthor nullId = new NatterByAuthor();
     when(natterByAuthorRepository.save(any())).thenReturn(nullId);
-    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), oAuth2User));
+    assertThrows(DatabaseErrorException.class,
+        () -> natterDao.create("123", new NatterCreateRequest(), oAuth2User));
   }
 
   @Test
   public void throwException_whenSaveToIdTableReturnsNoId(){
     NatterByAuthor nullId = new NatterByAuthor();
     when(natterByAuthorRepository.save(any())).thenReturn(nullId);
-    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.create("123", new NatterCreateRequest(), oAuth2User));
+    assertThrows(DatabaseErrorException.class,
+        () -> natterDao.create("123", new NatterCreateRequest(), oAuth2User));
   }
 
   @Test
@@ -98,7 +99,8 @@ class NatterDatabaseServiceTest {
     createdNatterById.setDateCreated(LocalDateTime.now());
     createdNatterById.setDateUpdated(createdNatterById.getDateCreated());
     when(natterByAuthorRepository.save(any())).thenReturn(new NatterByAuthor());
-    assertThrows(DatabaseErrorException.class, () -> natterDatabaseService.updateNatterAfterComment(createdNatterById));
+    assertThrows(DatabaseErrorException.class,
+        () -> natterDao.updateNatterAfterComment(createdNatterById));
   }
 
   @Test
@@ -115,7 +117,7 @@ class NatterDatabaseServiceTest {
     natterByAuthor.setId(new NatterByAuthorPrimaryKey());
     when(natterByAuthorRepository.save(any())).thenReturn(natterByAuthor);
     when(natterByIdRepository.save(any())).thenReturn(createdNatterById);
-    natterDatabaseService.updateNatterAfterComment(createdNatterById);
+    natterDao.updateNatterAfterComment(createdNatterById);
     verify(natterByAuthorRepository).save(any());
     verify(natterByIdRepository).save(any());
   }

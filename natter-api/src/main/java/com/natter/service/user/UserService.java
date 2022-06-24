@@ -1,10 +1,12 @@
 package com.natter.service.user;
 
+import com.natter.dao.UserDao;
 import com.natter.dto.GetResponseDto;
 import com.natter.dto.ResponseDto;
 import com.natter.dto.ResponseListDto;
 import com.natter.enums.user.ErrorMessageUserEnum;
 import com.natter.enums.user.SuccessMessageUserEnum;
+import com.natter.exception.DatabaseErrorException;
 import com.natter.model.template.UserToDisplay;
 import com.natter.model.user.User;
 import com.natter.model.user.UserFollowersFollowing;
@@ -33,7 +35,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserFollowersFollowingRepository userFollowersFollowingRepository;
 
-  private final UserDatabaseService userDatabaseService;
+  private final UserDao userDao;
 
   private final UpdateFollowerService updateFollowerService;
 
@@ -76,6 +78,12 @@ public class UserService {
       response.setErrorMessages(Map.of(ErrorMessageUserEnum.USER_NOT_FOUND.getCode(),
           ErrorMessageUserEnum.USER_NOT_FOUND.getMessage()));
       response.setStatus(HttpStatus.NOT_FOUND);
+    } catch (DatabaseErrorException e) {
+      log.error(
+          "error " + (isFollow ? "following " : "unfollowing ") + "user with database exception");
+      response.setErrorMessages(Map.of(ErrorMessageUserEnum.DATABASE_ERROR.getCode(),
+          ErrorMessageUserEnum.DATABASE_ERROR.getMessage()));
+      response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     return response;
@@ -87,7 +95,8 @@ public class UserService {
    * @param userId the user id
    * @return the list of followers wrapped around response list dto
    */
-  public ResponseListDto<UserFollowersFollowing> getFollowersForUserId(final String userId) {
+  public ResponseListDto<UserFollowersFollowing> getFollowersForUserId(
+      @NonNull final String userId) {
     ResponseListDto<UserFollowersFollowing> responseListDto = new ResponseListDto<>();
     try {
       User user = userRepository.findById(userId).orElseThrow();
@@ -145,7 +154,7 @@ public class UserService {
    * @return the following ids in a list
    */
   public List<String> getFollowingIdsForUser(@NonNull final String authId) {
-    return userDatabaseService.getFollowingForUser(authId);
+    return userDao.getFollowingIdsForUser(authId);
   }
 
   /**

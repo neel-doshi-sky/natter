@@ -19,13 +19,17 @@
         <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
         <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
         <EXTENSION ID="com.intellij.execution.ExternalSystemRunConfigurationJavaExtension">
-            <extension name="coverage" track_test_folders="true">
+            <extension name="coverage" sample_coverage="false" track_test_folders="true">
                 <pattern>
                     <option name="PATTERN" value="com.natter.service.*"/>
                     <option name="ENABLED" value="true"/>
                 </pattern>
                 <pattern>
                     <option name="PATTERN" value="com.natter.controller.*"/>
+                    <option name="ENABLED" value="true"/>
+                </pattern>
+                <pattern>
+                    <option name="PATTERN" value="com.natter.dao.*"/>
                     <option name="ENABLED" value="true"/>
                 </pattern>
             </extension>

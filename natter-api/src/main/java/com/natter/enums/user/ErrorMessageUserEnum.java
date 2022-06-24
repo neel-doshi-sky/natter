@@ -9,9 +9,9 @@ import lombok.ToString;
 @ToString
 public enum ErrorMessageUserEnum {
 
-  USER_NOT_FOUND("00011","user does not exist"),
-  USER_ID_NULL("00012","user id cannot be null");
-
+  USER_NOT_FOUND("60011", "user does not exist"),
+  USER_ID_NULL("60012", "user id cannot be null"),
+  DATABASE_ERROR("60013", "unable to process your request");
 
 
   private final String code;
